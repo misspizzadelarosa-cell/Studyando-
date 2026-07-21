@@ -312,7 +312,7 @@ export const PRELOADED_QUESTIONS: ExamQuestion[] = [
     id: 'q-6',
     type: 'SELECT_SIMPLE',
     topicId: 'doc-w11',
-    question: 'En un estudio de genética de poblaciones realizado en un municipio del estado Miranda para determinar la frecuencia del factor Rh, se observa que en una muestra de 1000 personas, 90 son Rh negativas (genotipo dd). Basándose en la ley de Hardy-Weinberg, ¿cuál es la frecuencia génica del alelo recesivo "d" (q) y cuál es la frecuencia estimada de portadores heterocigotos (2pq) en dicha población?',
+    question: 'En un estudio de genética de poblaciones realizado en un municipio para determinar la frecuencia del factor Rh, se observa que en una muestra de 1000 personas, 90 son Rh negativas (genotipo dd). Basándose en la ley de Hardy-Weinberg, ¿cuál es la frecuencia génica del alelo recesivo "d" (q) y cuál es la frecuencia estimada de portadores heterocigotos (2pq) en dicha población?',
     options: [
       'q = 0.30; Portadores (2pq) = 0.42 (42%)',
       'q = 0.09; Portadores (2pq) = 0.18 (18%)',
@@ -322,5 +322,89 @@ export const PRELOADED_QUESTIONS: ExamQuestion[] = [
     correctAnswer: 'q = 0.30; Portadores (2pq) = 0.42 (42%)',
     explanation: 'La frecuencia del genotipo homocigoto recesivo (dd) es q² = 90 / 1000 = 0.09. Por lo tanto, la frecuencia del alelo d (q) es la raíz cuadrada de 0.09, que es q = 0.30. La frecuencia del alelo dominante D (p) es 1 - q = 0.70. La frecuencia de heterocigotos (Dd) es 2pq = 2 * 0.70 * 0.30 = 0.42 (42%).',
     communityContext: 'La genética poblacional permite planificar la disponibilidad de inmunoglobulina anti-D en la red de consultorios populares para prevenir la enfermedad hemolítica perinatal.'
+  },
+  {
+    id: 'q-7',
+    type: 'SELECT_SIMPLE',
+    topicId: 'doc-w7',
+    question: 'Un paciente masculino de 35 años sufre una herida incisa limpia en antebrazo provocada por bisturí en quirófano. Se realiza sutura quirúrgica afrontando los bordes con técnica aséptica en las primeras horas. ¿Qué tipo de reparación tisular predomina y cuál es la característica del tejido cicatrizal resultante?',
+    options: [
+      'Cicatrización por segunda intención; deja una cicatriz grande e irregular con contracción severa.',
+      'Cicatrización por primera intención; deja una cicatriz delgada, lineal y estéticamente mínima.',
+      'Regeneración parenquimatosa pura; no queda ninguna cicatriz ni colágeno.',
+      'Cicatrización por tercera intención; requiere injerto cutáneo heterólogo.'
+    ],
+    correctAnswer: 'Cicatrización por primera intención; deja una cicatriz delgada, lineal y estéticamente mínima.',
+    explanation: 'Las heridas quirúrgicas limpias con bordes aproximados por suturas curan por primera intención. Hay mínima muerte celular, leve exudado inflamatorio y escasa formación de tejido de granulación, resultando en una cicatriz lineal fina.',
+    communityContext: 'En la cirugía menor en el CDI, el adecuado afrontamiento de bordes y la curación plana precoz minimizan la cicatrización por segunda intención y el riesgo de infecciones secundarias.'
+  },
+  {
+    id: 'q-8',
+    type: 'CLINICO_COMUNITARIO',
+    topicId: 'doc-w8',
+    question: 'En la consulta de Genética del ASIC, se confecciona el árbol genealógico de una familia donde el abuelo paterno y dos de sus hijos varones padecen hemofilia A. Las hijas mujeres de los varones afectados no padecen la enfermedad pero son portadoras sanas, mientras que los hijos varones de estas portadoras tienen un 50% de probabilidad de padecer la enfermedad. ¿A qué patrón de herencia monogénica corresponde esta patología?',
+    options: [
+      'Autosómica Dominante',
+      'Autosómica Recesiva',
+      'Recesiva Ligada al Cromosoma X',
+      'Herencia Mitocondrial'
+    ],
+    correctAnswer: 'Recesiva Ligada al Cromosoma X',
+    explanation: 'La hemofilia A se hereda de forma recesiva ligada al X. Los varones afectados (XhY) no transmiten el gen mutado a sus hijos varones (les dan el Y), pero todas sus hijas mujeres reciben el Xh convirtiéndose en portadoras obligadas.',
+    communityContext: 'El dibujo riguroso del árbol genealógico familiar en la historia médica comunitaria es la herramienta fundamental de pesquisa primaria de coagulopatías en la APS.'
+  },
+  {
+    id: 'q-9',
+    type: 'SELECT_SIMPLE',
+    topicId: 'doc-w9',
+    question: 'Una madre de 29 años acude al consultorio con su hijo de 4 años que presenta miopatía severa, acidosis láctica y episodios convulsivos. Se constata que la madre padece una forma leve de la misma alteración metabólica, al igual que los dos hermanos del paciente (varón y hembra). El padre del lactante es completamente sano. La biopsia muscular revela "fibras rojas rasgadas". ¿Qué patrón de herencia no mendeliana está presente?',
+    options: [
+      'Disomía uniparental paterna',
+      'Herencia Mitocondrial (maternal)',
+      'Impronta genómica paternal',
+      'Mosaicismo somático'
+    ],
+    correctAnswer: 'Herencia Mitocondrial (maternal)',
+    explanation: 'El ADN mitocondrial se hereda exclusivamente por vía materna a través del citoplasma del óvulo. Un madre afectada transmite el rasgo a todos sus hijos (varones y hembras), pero los varones no lo transmiten a su descendencia.',
+    communityContext: 'Identificar el origen materno estricto en encefalomiopatías orienta el consejo genético, informando a la madre sobre el riesgo para futuras gestaciones.'
+  },
+  {
+    id: 'q-10',
+    type: 'SELECT_SIMPLE',
+    topicId: 'doc-w10',
+    question: 'Lactante varón recién nacido en la maternidad del hospital con llanto débil, hipotonía generalizada, hendiduras palpebrales oblicuas hacia arriba, pliegue palmar único simiano, epicanto y pabellones auriculares de implantación baja. El cariotipo reporta 47,XY,+21. ¿Cuál fue el mecanismo citogenético más frecuente responsable de esta aberración cromosómica numéricas?',
+    options: [
+      'Translocación robertsoniana t(14;21)',
+      'No disyunción meiótica durante la gametogénesis materna',
+      'Mosaicismo por falla mitótica poscigótica',
+      'Inversión pericéntrica del cromosoma 21'
+    ],
+    correctAnswer: 'No disyunción meiótica durante la gametogénesis materna',
+    explanation: 'El 95% de los casos de Trisomía 21 (Síndrome de Down) corresponden a trisomía libre causada por una no disyunción meiótica (falla de separación de los cromosomas homólogos), con mayor frecuencia en la meiosis I de la ovogénesis materna.',
+    communityContext: 'El acompañamiento amoroso, humanizado y la estimulación temprana en la comunidad (ASIC) son clave para el desarrollo pleno de niñas y niños con Síndrome de Down.'
+  },
+  {
+    id: 'q-11',
+    type: 'DESARROLLO_CORTO',
+    topicId: 'doc-w12',
+    question: 'Diferencie desde el punto de vista etiopatogénico una Malformación de una Disrupción en la génesis de defectos congénitos.',
+    correctAnswer: 'Una malformación es una alteración intrínseca del desarrollo morfológico de un órgano desde su primordio (ej. labio leporino genético). Una disrupción es la destrucción o interferencia extrinsicade un órgano o tejido que originalmente se estaba formando de manera completamente normal (ej. bridas amnióticas o infección por Zika).',
+    explanation: 'La malformación responde a un defecto intrínseco (frecuentemente génico o cromosómico). La disrupción se debe a un agente extrínseco destructivo (isquémico, teratogénico, infeccioso o mecánico).',
+    communityContext: 'El control prenatal sistemático en Barrio Adentro (evitar medicamentos teratogénicos, prevención de infecciones TORCH) reduce la incidencia de disrupciones en la comunidad.'
+  },
+  {
+    id: 'q-12',
+    type: 'SELECT_SIMPLE',
+    topicId: 'doc-w12',
+    question: 'Durante la consulta de Asesoramiento Genético en el CDI, los padres de un recién nacido con un defecto severo preguntan sobre la conducta a seguir. ¿Cuál es el principio ético fundamental que debe guiar la postura del médico al brindar este asesoramiento?',
+    options: [
+      'Directividad paternalista eligiendo la mejor opción por los padres',
+      'No directividad respetando la autonomía de los padres para tomar decisiones informadas',
+      'Obligatoriedad de interrupción del embarazo en todos los casos',
+      'Someter la decisión a votación del comité de salud comunitario'
+    ],
+    correctAnswer: 'No directividad respetando la autonomía de los padres para tomar decisiones informadas',
+    explanation: 'El asesoramiento genético moderno se rige por el principio de NO DIRECTIVIDAD, donde el profesional aporta información clara, científica y comprensible para que los padres decidan libremente respetando su autonomía y principios morales.',
+    communityContext: 'El respeto a la dignidad humana y la autonomía familiar en la red de salud primaria fortalece la confianza ética entre la comunidad y el equipo médico de la UCS.'
   }
 ];
