@@ -1,0 +1,8 @@
+{
+  "name": "Tutor Clínico UCS",
+  "description": "Plataforma de estudio intensivo de 48 horas de Morfofisiopatología Humana I para estudiantes de la Universidad de las Ciencias de la Salud (UCS) en Venezuela.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
