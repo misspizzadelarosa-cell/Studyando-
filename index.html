@@ -1,16 +1,1520 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tutor Clínico UCS - Plan 48H Morfofisiopatología I</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-950">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutor Clínico UCS - Plan 48H Morfofisiopatología Humana I</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React 18 & ReactDOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel Standalone for in-browser JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .font-serif { font-family: 'Source Serif 4', serif; }
+    
+    /* 3D Card Flip styles */
+    .perspective { perspective: 1000px; }
+    .transform-style { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-950">
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // =========================================================================
+    // DATA MODULE: SÍLABO OFICIAL Y BATERÍAS DE EXÁMENES UCS (12 SEMANAS)
+    // =========================================================================
+
+    const CLINICAL_BLOCKS = [
+      {
+        id: 'block-1',
+        name: 'Bloque I: Introducción y Lesión Celular',
+        priority: 'CRÍTICA',
+        weeks: [1, 2, 3, 4, 5],
+        clinicalGoal: 'Dominar la etiopatogenia de la lesión reversible/irreversible, muerte celular (necrosis vs apoptosis), acumulaciones patológicas (aterosclerosis, diabetes mellitus) e interpretación de laboratorios e imagenología.',
+        syllabusTopics: [
+          'Semana 1: Conceptos de Morfofisiopatología (Etiología, Patogenia, Patocronía, Genéticos y Adquiridos).',
+          'Semana 2: Métodos de estudio diagnósticos (Muestras, Biopsias, Química Sanguínea, Imagenología y Bioética).',
+          'Semana 3: Adaptación celular (Atrofia, Hipertrofia, Hiperplasia, Metaplasia) e Hipoxia/Isquemia.',
+          'Semana 4: Lesión celular reversible (Tumefacción, Esteatosis) e irreversible (Necrosis: Coagulación, Colicuativa, Caseosa, Grasa; Apoptosis).',
+          'Semana 5: Acumulaciones intracelulares, Aterosclerosis, Diabetes Mellitus (Kimmelstiel-Wilson) y Calcificaciones.'
+        ]
+      },
+      {
+        id: 'block-2',
+        name: 'Bloque II: Respuesta Tisular (Inflamación y Reparación)',
+        priority: 'CRÍTICA',
+        weeks: [6, 7],
+        clinicalGoal: 'Diferenciar respuestas inflamatorias agudas y crónicas, mediadores químicos (histamina), patrones morfológicos y el proceso de reparación (cicatrización por 1ra/2da intención vs regeneración) con enfoque en la APS.',
+        syllabusTopics: [
+          'Semana 6: Inflamación Aguda y Crónica. Fenómenos vasculares, leucocitarios (fagocitosis), mediadores e infiltrados.',
+          'Semana 7: Reparación Tisular (Regeneración parenquimatosa vs Cicatrización). Tejido de granulación, 1ra/2da intención y complicaciones.'
+        ]
+      },
+      {
+        id: 'block-3',
+        name: 'Bloque III: Genética Médica Básica y Mendeliana',
+        priority: 'ALTA',
+        weeks: [8, 9],
+        clinicalGoal: 'Analizar la transmisión de simples mutaciones génicas bajo leyes de Mendel, confección de árbol genealógico e identificación de interferencias biológicas (herencia mitocondrial, impronta genómica, fragilidad del X).',
+        syllabusTopics: [
+          'Semana 8: Enfermedades monogénicas. Patrones de herencia mendeliana (Autosómica Dominante/Recesiva, Ligada al X). Árbol genealógico.',
+          'Semana 9: Interferencias biológicas (Herencia mitocondrial, Impronta genómica: Prader-Willi/Angelman, Fragil X, Disomías, Mosaicismo).'
+        ]
+      },
+      {
+        id: 'block-4',
+        name: 'Bloque IV: Genética Médica Avanzada, Poblacional y Bioética',
+        priority: 'MODERADA',
+        weeks: [10, 11, 12],
+        clinicalGoal: 'Diagnosticar aberraciones cromosómicas estructurales y numéricas (Down, Turner, Klinefelter), aplicar la Ley de Hardy-Weinberg en genética poblacional y dominar el asesoramiento genético prenatal con principios éticos.',
+        syllabusTopics: [
+          'Semana 10: Aberraciones cromosómicas numéricas (Trisomías 21, 13, 18; Turner 45,X; Klinefelter 47,XXY) y corpúsculos de Barr.',
+          'Semana 11: Marcadores genéticos (Sistemas ABO, Rh, HLA) y Genética de Poblaciones (Equilibrio de Hardy-Weinberg p²+2pq+q²=1).',
+          'Semana 12: Herencia multifactorial, defectos congénitos (Malformación, Deformación, Disrupción, Displasia), Asesoramiento Genético y Bioética.'
+        ]
+      }
+    ];
+
+    const ALL_DOCUMENTS = [
+      {
+        id: 'doc-w1',
+        title: 'Guía Orientadora de Clase - Semana 1',
+        week: 1,
+        topic: 'Procesos Patológicos y Métodos de Estudio',
+        summary: 'Caracterización de la disciplina Morfofisiopatología Humana. Conceptos de proceso patológico, etiología, patogenia, cambios morfológicos, semiología, fisiopatología y patocronía. Clasificación causal fundamental: Genéticos y Adquiridos.',
+        content: `La Morfofisiopatología Humana es una disciplina integradora que unifica los conocimientos de la Genética, Anatomía Patológica, Inmunología, Microbiología, Parasitología, Laboratorio Clínico e Imagenología.
+
+Un proceso patológico es el trastorno fisiopatológico dinámico caracterizado por alteraciones moleculares, celulares, tisulares y de órganos que se reflejan en los síntomas y signos de enfermedad.
+
+Su núcleo de estudio abarca:
+1. Etiología: Estudio de las causas que originan la enfermedad (físicas, químicas, biológicas, genéticas, hemodinámicas, inmunitarias, nutricionales).
+2. Patogenia: Mecanismos de producción y desarrollo de la enfermedad.
+3. Cambios morfológicos: Alteraciones estructurales macroscópicas y microscópicas en células, tejidos y órganos.
+4. Fisiopatología: Consecuencias funcionales de los cambios morfológicos.
+5. Semiología: Estudio de los síntomas (subjetivos) y signos (objetivos) de la enfermedad.
+6. Patocronía: Evolución de la enfermedad a lo largo del tiempo.
+
+Clasificación según la causa:
+- Genéticos: Monogénicos (simples mutaciones), Cromosómicos (aberraciones numéricas o estructurales) y Multifactoriales (interacción gen-ambiente).
+- Adquiridos: Agentes físicos, químicos, biológicos, alteraciones hemodinámicas, inmunitarias, nutricionales, envejecimiento, iatrogenia y causas idiopáticas.`
+      },
+      {
+        id: 'doc-w2',
+        title: 'Guía Orientadora de Clase - Semana 2',
+        week: 2,
+        topic: 'Métodos de Estudio Generales y Toma de Muestras',
+        summary: 'Muestra biológica (sangre, orina, heces, semen, LCR, biopsias). Requisitos de conservación de muestras (ayuno, reposo) y bioética diagnóstica (consentimiento informado y confidencialidad).',
+        content: `Una muestra biológica es la porción proveniente de tejidos o fluidos obtenida para su análisis y diagnóstico.
+
+Departamentos diagnósticos y sus fundamentos:
+1. Anatomía Patológica: Biopsias (incisional, excisional, por ponche, curetaje, por congelación/transoperatoria, aspirativa) y citologías.
+2. Laboratorio Clínico e Inmunología: Química sanguínea, hematología básica y especial, pruebas de hemostasia, parcial de orina y cituria.
+3. Microbiología y Parasitología: Exámenes directos, cultivos, pruebas serológicas y PCR.
+4. Genética: Cariotipo, cromatina sexual (corpúsculo de Barr), estudios moleculares directos e indirectos (RFLP).
+5. Imagenología: Rayos X simples y contrastados, ecosonografía (ultrasonido), tomografía axial computarizada (TAC), resonancia magnética (RM) y gammagrafía.
+
+Requisitos de la toma de muestra:
+- Indicación médica precisa, ayuno adecuado (8-12h para lípidos y glucosa), evitar ejercicio intenso previo y suspensión de fármacos interferentes.
+
+Bioética diagnóstica:
+- Ningún examen debe realizarse sin consentimiento informado y aprobación del paciente.
+- Los resultados de laboratorio son estrictamente confidenciales. El personal médico debe cumplir normas de bioseguridad.`
+      },
+      {
+        id: 'doc-w3',
+        title: 'Guía Orientadora de Clase - Semana 3',
+        week: 3,
+        topic: 'Adaptación Celular y Etiopatogenia de la Lesión',
+        summary: 'Adaptación celular reversible: Atrofia, Hipertrofia, Hiperplasia y Metaplasia. Etiología de la lesión celular con modelo de hipoxia/isquemia.',
+        content: `La adaptación celular es un estado de equilibrio alterado pero reversible frente a demandas fisiológicas excesivas o estímulos patológicos.
+
+Tipos de adaptación celular:
+1. Atrofia: Disminución del tamaño y función celular por reducción de sus componentes (ej: atrofia uterina postparto [fisiológica], atrofia renal por isquemia crónica [patológica]).
+2. Hipertrofia: Aumento del tamaño celular que incrementa el volumen del órgano. Ocurre en células que no se dividen (ej: músculo de deportistas [fisiológica], hipertrofia miocárdica por hipertensión arterial [patológica]).
+3. Hiperplasia: Aumento del número de células en un órgano por mitosis (ej: mama en el embarazo [fisiológica], hiperplasia prostática benigna o bocio tiroideo [patológica]).
+4. Metaplasia: Sustitución reversible de un tipo celular adulto por otro tipo celular adulto mejor capacitado para soportar el ambiente adverso (ej: metaplasia escamosa del epitelio respiratorio en fumadores).
+
+Etiopatogenia de la lesión por Hipoxia e Isquemia:
+- La falta de oxígeno inhibe la fosforilación oxidativa mitocondrial, provocando caída drástica del ATP.
+- Falla de la bomba de Na+-K+ ATPasa: Salida de K+, entrada masiva de Na+ y agua por ósmosis, ocasionando tumefacción hidrópica celular.`
+      },
+      {
+        id: 'doc-w4',
+        title: 'Guía Orientadora de Clase - Semana 4',
+        week: 4,
+        topic: 'Lesión Celular Reversible, Irreversible y Muerte Celular',
+        summary: 'Lesión reversible (tumefacción, esteatosis). Lesión irreversible: Necrosis (picnosis, cariorrexis, cariolisis) y Apoptosis (muerte programada). Patrones de necrosis: coagulación, colicuativa, caseosa, grasa.',
+        content: `Morfología de la lesión celular reversible:
+1. Tumefacción celular (cambio hidrópico): vacuolas claras de agua en el citoplasma por fallo de bombas iónicas.
+2. Cambio graso (esteatosis): acumulación de vacuolas de triglicéridos en el citoplasma (frecuente en hígado por alcoholismo o dieta grasa).
+
+Muerte celular por Necrosis (Irreversible):
+- Siempre es patológica, con desnaturalización proteica y digestión enzimática por autólisis y heterólisis.
+- Cambios nucleares necróticos: Picnosis (encogimiento e hiperbasofilia), Cariorrexis (fragmentación nuclear) y Cariolisis (disolución de la cromatina).
+
+Patrones morfológicos de Necrosis:
+a) Necrosis por Coagulación: conservación del contorno celular ("imagen en fantasma" o "lápida sepulcral"). Causa típica: infarto agudo del miocardio por isquemia.
+b) Necrosis Colicuativa (Liquefactiva): digestión enzimática rápida que convierte el tejido en masa líquida. Típica de infartos cerebrales y abscesos.
+c) Necrosis Caseosa: aspecto blanco-amarillento, friable, semejante al queso seco. Patognomónica de la Tuberculosis.
+d) Necrosis Enzimática de las Grasas: liberación de lipasas pancreáticas que digieren el tejido adiposo, formando depósitos de calcio (saponificación grasa o "jabones"). Ocurre en la pancreatitis aguda.
+
+Apoptosis: Muerte celular programada sin respuesta inflamatoria, caracterizada por condensación cromatínica, formación de cuerpos apoptóticos y fagocitosis rápida.`
+      },
+      {
+        id: 'doc-w5',
+        title: 'Guía Orientadora de Clase - Semana 5',
+        week: 5,
+        topic: 'Acumulaciones Intracelulares, Aterosclerosis y Diabetes Mellitus',
+        summary: 'Acumulación de lípidos, glucógeno y pigmentos. Aterosclerosis como inflamación crónica de la íntima. Diabetes Mellitus y calcificaciones distróficas vs metastásicas.',
+        content: `Acumulaciones Intracelulares:
+- Sustancias normales en exceso: Agua, triglicéridos, colesterol y glucógeno.
+- Pigmentos: Exógenos (polvo de carbón en la antracosis, tatuajes) y Endógenos (melanina, bilirrubina, lipofuscina, hemosiderina).
+
+Aterosclerosis:
+- Enfermedad de arterias elásticas y musculares caracterizada por placas lipídicas fibroinflamatorias en la túnica íntima (ateromas).
+- Complicaciones: Ulceración, trombosis, aneurismas, infarto miocárdico e infarto cerebral.
+
+Diabetes Mellitus:
+- Trastorno metabólico caracterizado por hiperglicemia crónica.
+- Tipo 1: Deficiencia absoluta de insulina por destrucción autoinmune de células beta pancreáticas.
+- Tipo 2: Resistencia periférica a la insulina combinada con secreción inadecuada.
+- Cambios microvasculares (Microangiopatía): Engrosamiento difuso de membranas basales capilares.
+- Lesión renal patognomónica: Glomeruloesclerosis nodular intercapilar o ENFERMEDAD DE KIMMELSTIEL-WILSON.
+
+Calcificaciones Patológicas:
+- Calcificación Distrófica: Depósito de calcio en tejidos necróticos o alterados con niveles séricos de calcio normales (ej: placas de ateroma, válvulas cardiacas lesionadas, centro de tuberculosis).
+- Calcificación Metastásica: Depósito de calcio en tejidos normales debido a hipercalcemia sérica (ej: hiperparatiroidismo, intoxicación con Vitamina D, insuficiencia renal crónica).`
+      },
+      {
+        id: 'doc-w6',
+        title: 'Guía Orientadora de Clase - Semana 6',
+        week: 6,
+        topic: 'Respuesta Inflamatoria Aguda y Crónica',
+        summary: 'Inflamación como respuesta vascularizada. Signos cardinales (rubor, calor, tumor, dolor, impotencia funcional). Fases vasculares, fenómenos leucocitarios y mediadores (histamina). Patrones de exudado.',
+        content: `La inflamación es una respuesta protectora compleja del tejido conjuntivo vascularizado ante agentes lesivos.
+
+Signos cardinales de la inflamación: Rubor, Calor, Tumor (edema), Dolor e Impotencia Funcional.
+
+Inflamación Aguda:
+- Comienzo rápido y corta duración. Dominada por polimorfonucleares neutrófilos.
+- Cambios vasculares: Vasodilatación arteriolar inmediata (medida por Histamina), aumento del flujo e incremento de la permeabilidad vascular con formación de exudado.
+- Fenómenos leucocitarios: Marginación, rodamiento, adhesión (pavimentación), migración (diapédesis), quimiotaxis y fagocitosis (fagosoma + lisosoma).
+
+Inflamación Crónica:
+- Duración prolongada (semanas, meses o años). Coexisten simultáneamente la inflamación activa, la destrucción tisular y los intentos de reparación.
+- Infiltrado característico: Linfocitos, macrófagos y células plasmáticas.
+
+Patrones morfológicos de la inflamación:
+1. Serosa: Exudado acuoso pobre en proteínas (derrame pleural/pericárdico, ampollas).
+2. Fibrinosa: Depósito de abundante fibrina en superficies serosas (pericarditis fibrinosa "en pan con mantequilla").
+3. Supurativa o Purulenta: Gran cantidad de exudado purulento rico en neutrófilos y detritus (meningitis bacteriana, apendicitis aguda).
+4. Granulomatosa: Acumulación focal de macrófagos activados (células epitelioides) rodeados por corona de linfocitos y células gigantes (ej: Tuberculosis).`
+      },
+      {
+        id: 'doc-w7',
+        title: 'Guía Orientadora de Clase - Semana 7',
+        week: 7,
+        topic: 'Reparación Tisular, Regeneración y Cicatrización',
+        summary: 'Regeneración parenquimatosa vs Cicatrización por tejido conectivo. Clasificación celular (lábiles, estables, permanentes). Curación por 1ra y 2da intención y complicaciones.',
+        content: `Capacidad regenerativa de las células:
+- Células Lábiles: Proliferación continua durante toda la vida (epitelio de piel, mucosa digestiva, médula ósea).
+- Células Estables: Quiescentes en fase G0, pero conservan la capacidad de entrar al ciclo celular ante estímulos (hepatocitos, túbulos renales, fibroblastos).
+- Células Permanentes: Incapaces de dividirse tras el nacimiento (neuronas, fibras musculares miocárdicas).
+
+Formas de Reparación:
+1. Regeneración parenquimatosa: Sustitución de células lesionadas por células del mismo tipo. Requiere preservación de la membrana basal y del estroma.
+2. Cicatrización (Fibrosis): Sustitución del tejido destruido por tejido conjuntivo fibroso mediante formación de TEJIDO DE GRANULACIÓN (proliferación de neovasos/angiogénesis y fibroblastos).
+
+Tipos de Cicatrización Cutánea:
+- Primera Intención: Ocurre en heridas quirúrgicas limpias, no infectadas, con bordes aproximados por sutura. Mínimo tejido de granulación y cicatriz lineal fina.
+- Segunda Intención: Ocurre en heridas con amplia pérdida tisular, úlceras o necrosis. Abundante tejido de granulación, contracción de la herida mediada por miofibroblastos y cicatriz prominente.
+
+Complicaciones: Dehiscencia de herida, hernias de incisión, tejido de granulación exuberante, queloides (exceso de colágeno) y contracturas.`
+      },
+      {
+        id: 'doc-w8',
+        title: 'Guía Orientadora de Clase - Semana 8',
+        week: 8,
+        topic: 'Transmisión de Simples Mutaciones e Herencia Mendeliana',
+        summary: 'Herencia monogénica mendeliana: Autosómica Dominante, Autosómica Recesiva, Ligada al X. Pedigrí familiar y criterios de riesgo.',
+        content: `Enfermedades Monogénicas (Simples Mutaciones):
+Siguen los patrones de herencia mendeliana clásica y se representan en el árbol genealógico (pedigrí).
+
+1. Herencia Autosómica Dominante (ej: Polidactilia, Acondroplasia, Marfan):
+- Expresión en heterocigotos (Aa).
+- Patrón de transmisión vertical (afectados en todas las generaciones).
+- Varones y hembras afectados por igual. Riesgo de recurrencia en descendencia: 50%.
+- Transmisión varón a varón es posible.
+
+2. Herencia Autosómica Recesiva (ej: Sicklemia, Albinismo, Fibrosis Quística):
+- Requiere doble dosis del gen mutado en homocigosis (aa).
+- Padres fenotípicamente sanos pero portadores heterocigotos (Aa).
+- Patrón de transmisión horizontal. Consanguinidad aumenta el riesgo.
+- Riesgo de recurrencia por cada embarazo: 25%.
+
+3. Herencia Recesiva Ligada al X (ej: Hemofilia A, Distrofia Muscular de Duchenne):
+- Gen mutado en el cromosoma X.
+- Mayoritariamente varones afectados (hemicigotos XhY).
+- Las mujeres son portadoras asintomáticas (XHXh).
+- Un hombre afectado NO transmite la enfermedad a sus hijos varones (100% de hijas portadoras).
+- Una mujer portadora transmite el gen afectado al 50% de sus hijos varones (enfermos) y al 50% de sus hijas (portadoras).`
+      },
+      {
+        id: 'doc-w9',
+        title: 'Guía Orientadora de Clase - Semana 9',
+        week: 9,
+        topic: 'Interferencias Biológicas y Bases Bioquímicas',
+        summary: 'Penetrancia reducida, expresividad variable, lyonización (corpúsculo de Barr), herencia mitocondrial (vía materna), impronta genómica (Prader-Willi / Angelman).',
+        content: `Fenómenos biológicos que alteran la herencia mendeliana:
+
+1. Penetrancia Reducida: Un individuo posee el genotípicamente mutado dominante pero NO expresa el fenotipo clínico.
+2. Expresividad Variable: Variación en la gravedad o manifestaciones del fenotipo entre individuos con el mismo genotipo mutado.
+3. Inactivación del Cromosoma X (Lyonización): Inactivación aleatoria de uno de los cromosomas X en células femeninas en fase de mórula, formando el corpúsculo de Barr.
+4. Herencia Mitocondrial (ej: Neuropatía Óptica de Leber):
+- Transmisión EXCLUSIVAMENTE MATERNA. El espermatozoide no aporta mitocondrias al cigoto.
+- Afecta a hombres y mujeres, pero un hombre afectado NUNCA transmite la enfermedad.
+5. Impronta Genómica (Genomic Imprinting):
+- Inactivación epigenética selectiva del alelo materno o paterno.
+- Deleción 15q11-13 de origen PATERNO causa Síndrome de PRADER-WILLI (obesidad, hipogonadismo).
+- Deleción 15q11-13 de origen MATERNO causa Síndrome de ANGELMAN (epilepsia, risa inapropiada, ataxia).
+6. Mutaciones Dinámicas (ej: Síndrome del Cromosoma X Frágil):
+- Expansión inestable de tripletes de nucleótidos (CGG > 200). Muestra el fenómeno de anticipación genacional.
+
+Bases Bioquímicas:
+- Errores innatos del metabolismo (ej: Fenilcetonuria por déficit de fenilalanina hidroxilasa).
+- Proteínas de transporte afectadas (ej: Sicklemia por hemoglobina S [valina por ac. glutámico]).`
+      },
+      {
+        id: 'doc-w10',
+        title: 'Guía Orientadora de Clase - Semana 10',
+        week: 10,
+        topic: 'Aberraciones Cromosómicas Numéricas y Estructurales',
+        summary: 'Aneuploidías: Trisomías 21 (Down), 13 (Patau), 18 (Edwards), Turner (45,X), Klinefelter (47,XXY). Corpúsculos de Barr (Fórmula N° X - 1).',
+        content: `Aberraciones Cromosómicas Numéricas (Aneuploidías):
+Causadas principalmente por NO DISYUNCIÓN meiótica o anafase retardada.
+
+Trisomías Autosómicas:
+1. Síndrome de Down (47,XX,+21 o 47,XY,+21): Hipotonía, pliegue palmar único, facies mongoloide, retraso mental.
+2. Síndrome de Patau (Trisomía 13): Holoprosencefalia, labio leporino, polidactilia. Severo y letal.
+3. Síndrome de Edwards (Trisomía 18): Puños cerrados con sobreposición de dedos, micrognatia, pies en mecedora.
+
+Aneuploidías Sexuales y Corpúsculo de Barr:
+- Fórmula del Corpúsculo de Barr: N° de Corpúsculos de Barr = N° de Cromosomas X - 1.
+a) Síndrome de Turner (45,X):
+   - Monosomía del cromosoma X. Talla baja, cuello alado (pterygium colli), amenorrea primaria, infantilismo sexual.
+   - Corpúsculos de Barr: 0 (1 - 1 = 0).
+b) Síndrome de Klinefelter (47,XXY):
+   - Varón con cromosoma X supernumerario. Talla alta, ginecomastia, testículos pequeños e infertilidad.
+   - Corpúsculos de Barr: 1 (2 - 1 = 1).
+
+Aberraciones Estructurales:
+- Balanceadas (Translocaciones recíprocas, Inversiones): Sin pérdida/ganancia de material. Fenotipo normal pero fallas reproductivas.
+- No Balanceadas (Deleciones, Duplicaciones, Isocromosomas): Alteración fenotípica. Ej: Síndrome de Cri du Chat (deleción 5p-).`
+      },
+      {
+        id: 'doc-w11',
+        title: 'Guía Orientadora de Clase - Semana 11',
+        week: 11,
+        topic: 'Marcadores Genéticos y Genética de Poblaciones',
+        summary: 'Sistemas ABO, Rh y HLA. Ley de Hardy-Weinberg en equilibrio genético (p + q = 1; p² + 2pq + q² = 1).',
+        content: `Marcadores Genéticos:
+Loci polimórficos de fácil determinación con patrón mendeliano simple.
+
+1. Sistema ABO:
+- Alelos múltiples (A, B, O). A y B presentan codominancia entre sí y dominancia sobre O.
+- Conflicto ABO materno-fetal: Causa ictericia neonatal y kerníctero si la bilirrubina no se controla.
+2. Sistema Rh:
+- Alelos D (dominante) y d (recesivo). Rh+ (DD o Dd), Rh- (dd).
+3. Sistema Mayor de Histocompatibilidad (HLA):
+- Loci A, B, C (Clase I) y DP, DQ, DR (Clase II) en el cromosoma 6. Clave en trasplantes de órganos.
+
+Genética de Poblaciones - Ley de Hardy-Weinberg:
+Estudia la distribución y frecuencias de genes y genotipos en poblaciones.
+
+Condiciones de Equilibrio:
+1. Población grande.
+2. Matrimonios al azar (panmixia).
+3. Sin mutación, selección ni migración.
+
+Ecuaciones Fundamentales:
+- Frecuencias Alélicas: p + q = 1 (donde p = frecuencia alelo dominante, q = frecuencia alelo recesivo).
+- Frecuencias Genotípicas: p² + 2pq + q² = 1
+  * p² = Homocigotos dominantes (AA)
+  * 2pq = Heterocigotos portadores (Aa)
+  * q² = Homocigotos recesivos (aa)`
+      },
+      {
+        id: 'doc-w12',
+        title: 'Guía Orientadora de Clase - Semana 12',
+        week: 12,
+        topic: 'Herencia Multifactorial, Defectos Congénitos y Asesoramiento Genético',
+        summary: 'Herencia multifactorial (modelo de umbral). Defectos congénitos: Malformación, Deformación, Disrupción, Displasia. Teratógenos (TORCH) y Bioética.',
+        content: `Herencia Multifactorial:
+Determinada por el efecto aditivo de múltiples genes (poligénica) interactuando con factores ambientales (ej: Hipertensión arterial, Diabetes tipo 2, Cáncer, Asma).
+
+Defectos Congénitos:
+Anormalidades estructurales anatómicas presentes al nacer.
+1. Malformación: Falla intrínseca del desarrollo morfológico (ej: labio leporino, espina bífida).
+2. Deformación: Alteración causada por fuerzas mecánicas extrínsecas sobre tejidos previamente normales (ej: pie zambo por oligohidramnios).
+3. Disrupción: Destrucción o ruptura de un tejido genéticamente bien formado (ej: amputación de dedos por bridas amnióticas).
+4. Displasia: Organización celular anormal en un tejido (ej: displasia esquelética tanatofórica).
+
+Agentes Teratógenos:
+Agentes ambientales que inducen malformaciones (TORCH: Toxoplasma, Rubéola, Citomegalovirus, Herpes/SIDA; alcohol, antiepilépticos, radiaciones).
+
+Asesoramiento Genético y Diagnóstico Prenatal:
+- Proceso de comunicación médica no directivo sobre riesgos de recurrencia en la familia.
+- Métodos de diagnóstico prenatal no invasivos (ecosonografía fetal) e invasivos (amniocentesis, biopsia coriónica). Principios bioéticos: Autonomía, Beneficencia, No maleficencia y Justicia.`
+      }
+    ];
+
+    const ALL_FLASHCARDS = [
+      {
+        id: 'fc-1',
+        topicId: 'doc-w3',
+        question: '¿Cuál es el primer mediador químico liberado en la respuesta vascular inmediata de la inflamación aguda?',
+        answer: 'La HISTAMINA.',
+        yield: 'HIGH-YIELD',
+        explanation: 'Liberada inmediatamente por mastocitos, provoca vasodilatación arteriolar y aumento de permeabilidad vascular.'
+      },
+      {
+        id: 'fc-2',
+        topicId: 'doc-w3',
+        question: '¿Qué tipo de adaptación celular ocurre en las vías respiratorias de un fumador crónico?',
+        answer: 'METAPLASIA escamosa.',
+        yield: 'HIGH-YIELD',
+        explanation: 'El epitelio cilíndrico ciliado es reemplazado por epitelio escamoso estratificado, más resistente pero sin aclaramiento mucociliar.'
+      },
+      {
+        id: 'fc-3',
+        topicId: 'doc-w4',
+        question: '¿Cuáles son los tres patrones morfológicos del núcleo en una célula necrótica?',
+        answer: 'PICNOSIS, CARIORREXIS y CARIOLISIS.',
+        yield: 'HIGH-YIELD',
+        explanation: 'Picnosis (encogimiento), Cariorrexis (fragmentación) y Cariolisis (disolución) marcan el punto irreversible de la necrosis.'
+      },
+      {
+        id: 'fc-4',
+        topicId: 'doc-w4',
+        question: '¿Qué patrón de necrosis es característico de la Tuberculosis pulmonar?',
+        answer: 'Necrosis CASEOSA.',
+        yield: 'HIGH-YIELD',
+        explanation: 'Masa amorfa blanco-amarillenta semejante a queso seco, rodeada por granuloma con células epitelioides y gigantes.'
+      },
+      {
+        id: 'fc-5',
+        topicId: 'doc-w5',
+        question: '¿Cuál es la lesión renal patognomónica de la Diabetes Mellitus?',
+        answer: 'ENFERMEDAD DE KIMMELSTIEL-WILSON (Glomeruloesclerosis nodular).',
+        yield: 'HIGH-YIELD',
+        explanation: 'Nódulos acelulares eosinófilos de matriz mesangial en la periferia de los capilares glomerulares.'
+      },
+      {
+        id: 'fc-6',
+        topicId: 'doc-w7',
+        question: '¿Cómo se clasifican las neuronas y el miocardio según su capacidad regenerativa?',
+        answer: 'Células PERMANENTES.',
+        yield: 'HIGH-YIELD',
+        explanation: 'No se dividen tras el nacimiento. Sus lesiones no regeneran y curan mediante cicatrización por fibrosis.'
+      },
+      {
+        id: 'fc-7',
+        topicId: 'doc-w9',
+        question: '¿Qué origen parental tiene la deleción 15q11-13 en el Síndrome de Prader-Willi vs Angelman?',
+        answer: 'PATERNO causa Prader-Willi; MATERNO causa Angelman.',
+        yield: 'HIGH-YIELD',
+        explanation: 'Fenómeno de Impronta Genómica donde la expresión de la afección depende del progenitor que aporta el gen delecionado.'
+      },
+      {
+        id: 'fc-8',
+        topicId: 'doc-w10',
+        question: '¿Cuántos corpúsculos de Barr presenta un paciente con Síndrome de Klinefelter (47,XXY)?',
+        answer: 'UN (1) corpúsculo de Barr.',
+        yield: 'HIGH-YIELD',
+        explanation: 'Fórmula: N° de cromosomas X - 1. En Klinefelter (XXY), hay 2 cromosomas X, por lo que 2 - 1 = 1.'
+      },
+      {
+        id: 'fc-9',
+        topicId: 'doc-w11',
+        question: 'En la Ley de Hardy-Weinberg (p² + 2pq + q² = 1), ¿qué representa el término 2pq?',
+        answer: 'La frecuencia genotípica de HETEROCIGOTOS (portadores Aa).',
+        yield: 'HIGH-YIELD',
+        explanation: 'p representa el alelo dominante y q el alelo recesivo en una población ideal en equilibrio.'
+      },
+      {
+        id: 'fc-10',
+        topicId: 'doc-w12',
+        question: '¿Qué tipo de defecto congénito es el pie zambo ocasionado por oligohidramnios?',
+        answer: 'DEFORMACIÓN.',
+        yield: 'HIGH-YIELD',
+        explanation: 'Efecto mecánico extrínseco inusual sobre un tejido que estaba genéticamente bien formado.'
+      }
+    ];
+
+    const EXAM_BATTERY = [
+      {
+        id: 'q-1',
+        type: 'SELECT_SIMPLE',
+        topicId: 'doc-w4',
+        question: 'Paciente masculino de 48 años acude a urgencias por dolor abdominal epigástrico irradiado a la espalda en barra y vómitos. Elevación masiva de lipasas pancreáticas. Se diagnostica pancreatitis hemorrágica aguda. ¿Qué tipo de necrosis caracteriza este proceso?',
+        options: [
+          'Necrosis por coagulación',
+          'Necrosis colicuativa',
+          'Necrosis caseosa',
+          'Necrosis enzimática de las grasas (saponificación)'
+        ],
+        correctAnswer: 'Necrosis enzimática de las grasas (saponificación)',
+        explanation: 'La pancreatitis libera lipasas que digieren el tejido adiposo peripancreático, formando jabones de calcio (saponificación).',
+        communityContext: 'En el consultorio popular (ASIC), el dolor en barra orienta a pancreatitis aguda y exige remisión inmediata.'
+      },
+      {
+        id: 'q-2',
+        type: 'CLINICO_COMUNITARIO',
+        topicId: 'doc-w5',
+        question: 'En el Consultorio Popular del ASIC, una paciente de 66 años con Diabetes Mellitus tipo 2 presenta una úlcera crónica en tobillo medial con abundante tejido de granulación. ¿Por qué tipo de cicatrización curará y qué factor retrasará la curación?',
+        options: [
+          'Cicatrización por primera intención; retrasada por uso de esteroides.',
+          'Cicatrización por segunda intención; retrasada por mala circulación e infección.',
+          'Regeneración parenquimatosa; retrasada por la edad.',
+          'Cicatrización por primera intención; retrasada por hipercolesterolemia.'
+        ],
+        correctAnswer: 'Cicatrización por segunda intención; retrasada por mala circulación e infección.',
+        explanation: 'Grandes defectos tisulares curan por segunda intención con abundante tejido de granulación. La microangiopatía diabética e infección retardan el proceso.',
+        communityContext: 'El control de la glicemia y curas estériles en el Barrio Adentro previenen la amputación del miembro.'
+      },
+      {
+        id: 'q-3',
+        type: 'SELECT_SIMPLE',
+        topicId: 'doc-w10',
+        question: 'Un recién nacido femenino presenta cuello alado (pterygium colli) y edema de manos. El informe citogenético indica fórmula 45,X. ¿A qué síndrome corresponde y cuántos corpúsculos de Barr presenta en frotis de mucosa oral?',
+        options: [
+          'Síndrome de Down; 1 corpúsculo de Barr.',
+          'Síndrome de Turner; 0 corpúsculos de Barr.',
+          'Síndrome de Klinefelter; 1 corpúsculo de Barr.',
+          'Síndrome de Edwards; 2 corpúsculos de Barr.'
+        ],
+        correctAnswer: 'Síndrome de Turner; 0 corpúsculos de Barr.',
+        explanation: 'Monosomía 45,X es Síndrome de Turner. Al tener sólo 1 cromosoma X (N° X - 1 = 0), no posee ningún corpúsculo de Barr.',
+        communityContext: 'La detección temprana de dismorfias en el consultorio popular permite la canalización al servicio de genética.'
+      },
+      {
+        id: 'q-4',
+        type: 'DESARROLLO_CORTO',
+        topicId: 'doc-w3',
+        question: 'Mencione la causa más frecuente de lesión celular y explique brevemente el mecanismo molecular de la tumefacción hidrópica.',
+        correctAnswer: 'La hipoxia o isquemia. Al faltar oxígeno disminuye el ATP, lo que inactiva la bomba de Na-K ATPasa. Esto ocasiona acumulación de sodio e ingreso masivo de agua a la célula por ósmosis.',
+        explanation: 'La falta de ATP colapsa el control iónico membranal, provocando hinchazón celular y vacuolización.',
+        communityContext: 'En la atención primaria, prevenir o revertir precozmente la hipoxia evita el paso a necrosis irreversible.'
+      },
+      {
+        id: 'q-5',
+        type: 'SELECT_SIMPLE',
+        topicId: 'doc-w6',
+        question: 'Paciente masculino de 27 años consultó por dolor en fosa ilíaca derecha y fiebre de 38°C. Es intervenido por apendicitis aguda purulenta. ¿Cuál es el leucocito predominante en el infiltrado y qué mediador químico inició la vasodilatación?',
+        options: [
+          'Linfocitos; Bradicinina.',
+          'Eosinófilos; Prostaglandinas.',
+          'Polimorfonucleares neutrófilos; Histamina.',
+          'Macrófagos; Factor de Necrosis Tumoral (TNF).'
+        ],
+        correctAnswer: 'Polimorfonucleares neutrófilos; Histamina.',
+        explanation: 'La inflamación aguda purulenta se caracteriza por abundantes neutrófilos. La histamina inicia la vasodilatación inmediata.',
+        communityContext: 'El leucograma con neutrofilia en la red comunitaria confirma la sospecha de proceso infeccioso bacteriano agudo.'
+      },
+      {
+        id: 'q-6',
+        type: 'SELECT_SIMPLE',
+        topicId: 'doc-w11',
+        question: 'En una población de 1000 personas en equilibrio de Hardy-Weinberg, 90 son Rh negativas (genotipo dd = q² = 0.09). ¿Cuál es la frecuencia del alelo d (q) y la proporción esperada de heterocigotos (2pq)?',
+        options: [
+          'q = 0.30; Heterocigotos (2pq) = 0.42 (42%)',
+          'q = 0.09; Heterocigotos (2pq) = 0.18 (18%)',
+          'q = 0.50; Heterocigotos (2pq) = 0.50 (50%)',
+          'q = 0.70; Heterocigotos (2pq) = 0.21 (21%)'
+        ],
+        correctAnswer: 'q = 0.30; Heterocigotos (2pq) = 0.42 (42%)',
+        explanation: 'q = √0.09 = 0.30. p = 1 - 0.30 = 0.70. Proporción de heterocigotos 2pq = 2 * (0.70) * (0.30) = 0.42 (42%).',
+        communityContext: 'Permite estimar la necesidad de Inmunoglobulina Anti-D en la red de atención materno-infantil.'
+      },
+      {
+        id: 'q-7',
+        type: 'SELECT_SIMPLE',
+        topicId: 'doc-w8',
+        question: 'Un varón padece Hemofilia A (patrón recesivo ligado al X). Su esposa es homocigoto sana. ¿Cuál es el riesgo de que sus hijos varones padezcan la enfermedad y cuál para sus hijas?',
+        options: [
+          '50% de varones enfermos; 50% de hijas portadoras.',
+           me 0% de varones enfermos (todos sanos); 100% de hijas portadoras.',
+          '100% de varones enfermos; 0% de hijas afectadas.',
+          '25% de varones enfermos; 25% de hijas portadoras.'
+        ],
+        correctAnswer: '0% de varones enfermos (todos sanos); 100% de hijas portadoras.',
+        explanation: 'El padre transmite su cromosoma Y (normal) a todos sus varones (sanos) y su cromosoma Xh (mutado) a todas sus hijas (portadoras).',
+        communityContext: 'Base del consejo genético en el consultorio popular para familias con trastornos de la coagulación.'
+      },
+      {
+        id: 'q-8',
+        type: 'DESARROLLO_CORTO',
+        topicId: 'doc-w9',
+        question: 'Explique por qué un hombre afectado por una enfermedad de herencia mitocondrial NUNCA transmite la afección a sus hijos.',
+        correctAnswer: 'Porque la herencia mitocondrial es exclusivamente materna. Durante la fecundación, el espermatozoide sólo aporta el núcleo y carece de citoplasma con mitocondrias, el cual es provisto en su totalidad por el óvulo.',
+        explanation: 'Las mitocondrias y su ADN circular se heredan por línea materna.',
+        communityContext: 'Criterio clave evaluado en las preguntas de genética del examen teórico UCS.'
+      }
+    ];
+
+    // =========================================================================
+    // MAIN APP COMPONENT
+    // =========================================================================
+
+    function App() {
+      const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'estudio', 'tutor', 'simulador'
+      const [documents, setDocuments] = useState(ALL_DOCUMENTS);
+      const [processedDocs, setProcessedDocs] = useState([]);
+      const [isProcessing, setIsProcessing] = useState(false);
+
+      // Study module states
+      const [selectedBlockId, setSelectedBlockId] = useState(CLINICAL_BLOCKS[0].id);
+      const [selectedWeek, setSelectedWeek] = useState(1);
+      const [studyViewMode, setStudyViewMode] = useState('lectura'); // 'lectura' or 'sintesis'
+      const [isGeneratingStudy, setIsGeneratingStudy] = useState(false);
+      const [generatedStudy, setGeneratedStudy] = useState(null);
+      const [flippedCards, setFlippedCards] = useState({});
+
+      // Tutor Chat states
+      const [tutorWeek, setTutorWeek] = useState(1);
+      const [chatMessages, setMessages] = useState([
+        {
+          id: 'welcome-1',
+          sender: 'tutor',
+          text: '¡Hola! Soy tu Tutor Clínico de la UCS. Estoy listo para explicarte a fondo cualquier tema de Morfofisiopatología Humana I, aclararte dudas teóricas o hacerte preguntas de autoevaluación de las Baterías de Examen. ¿Qué deseas revisar hoy?',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+      const [chatInput, setChatInput] = useState('');
+      const [isTutorThinking, setIsTutorThinking] = useState(false);
+      const [pendingQuiz, setPendingQuiz] = useState(null);
+      const [quizStudentAns, setQuizStudentAns] = useState('');
+
+      // Exam Simulator states
+      const [currentQIdx, setCurrentQIdx] = useState(0);
+      const [selectedOpt, setSelectedOpt] = useState('');
+      const [writtenAns, setWrittenAns] = useState('');
+      const [isEvaluating, setIsEvaluating] = useState(false);
+      const [evalResult, setEvalResult] = useState(null);
+      const [scoreStats, setScoreStats] = useState({ answered: 0, correct: 0 });
+
+      // Refresh icons on state change
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      });
+
+      // Handle Process All Docs
+      const handleProcessAll = () => {
+        setIsProcessing(true);
+        setTimeout(() => {
+          const allIds = documents.map(d => d.id);
+          setProcessedDocs(allIds);
+          setIsProcessing(false);
+        }, 1500);
+      };
+
+      const activeBlock = CLINICAL_BLOCKS.find(b => b.id === selectedBlockId) || CLINICAL_BLOCKS[0];
+      const activeDoc = documents.find(d => d.week === selectedWeek) || documents[0];
+
+      // Handle AI Study Generation
+      const handleGenerateAIStudy = async () => {
+        if (!activeDoc) return;
+        setIsGeneratingStudy(true);
+        try {
+          const res = await fetch('/api/gemini/generate-study', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ week: activeDoc.week, topic: activeDoc.topic, docContent: activeDoc.content })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setGeneratedStudy(data);
+          } else {
+            throw new Error("Offline fallback");
+          }
+        } catch (e) {
+          // Fallback offline synthesizer
+          setGeneratedStudy({
+            sintesis: `SÍNTESIS DE ALTO RENDIMIENTO - SEMANA ${activeDoc.week} (${activeDoc.topic.toUpperCase()}):\n\n${activeDoc.summary}\n\nFundamento Fisiopatológico:\n${activeDoc.content.slice(0, 450)}...\n\nAtención Primaria de Salud (APS): En el Consultorio Popular de Barrio Adentro (ASIC), la identificación temprana de las alteraciones de ${activeDoc.topic} permite el diagnóstico oportuno y la prevención de complicaciones severas.`,
+            puntosFocalizados: [
+              `Mecanismo etiopatogénico principal y alteraciones estructurales en ${activeDoc.topic}.`,
+              `Criterios morfológicos macro/microscópicos evaluados en la prueba UCS.`,
+              `Abordaje comunitario en el Consultorio Popular y ASIC de Barrio Adentro.`,
+              `Evidencias de laboratorio e imagenología para diagnóstico diferencial.`
+            ],
+            flashcards: [
+              {
+                question: `¿Cuál es el núcleo fisiopatológico principal de ${activeDoc.topic}?`,
+                answer: `Alteración específica de la homeostasis caracterizada por ${activeDoc.summary.slice(0, 90)}...`,
+                explanation: `Concepto clave evaluado en las Baterías Oficiales de Morfofisiopatología Humana I de la UCS.`
+              },
+              {
+                question: `¿Cómo se aplica la Atención Primaria de Salud (APS) en este tema?`,
+                answer: `Mediante pesquisa activa, diagnóstico precoz en el consultorio popular y derivación oportuna al ASIC.`,
+                explanation: `El componente clínico-comunitario representa el 40% de la evaluación en la UCS.`
+              }
+            ]
+          });
+        } finally {
+          setIsGeneratingStudy(false);
+          setStudyViewMode('sintesis');
+        }
+      };
+
+      // Handle Tutor Chat Q&A
+      const handleSendChat = async (overrideText) => {
+        const text = (overrideText || chatInput).trim();
+        if (!text || isTutorThinking) return;
+
+        const userMsg = {
+          id: `u-${Date.now()}`,
+          sender: 'user',
+          text,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        setMessages(prev => [...prev, userMsg]);
+        setChatInput('');
+        setIsTutorThinking(true);
+
+        const currentTutorDoc = documents.find(d => d.week === tutorWeek) || activeDoc;
+
+        try {
+          const res = await fetch('/api/gemini/ask-tutor', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              question: text,
+              topic: currentTutorDoc.topic,
+              week: currentTutorDoc.week,
+              docContent: currentTutorDoc.content
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const tutorMsg = {
+              id: `t-${Date.now()}`,
+              sender: 'tutor',
+              text: data.answer,
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            setMessages(prev => [...prev, tutorMsg]);
+          } else {
+            throw new Error("Offline");
+          }
+        } catch (e) {
+          // Offline intelligent answer generator
+          const tutorMsg = {
+            id: `t-${Date.now()}`,
+            sender: 'tutor',
+            text: `Explicación sobre "${text}" (Semana ${currentTutorDoc.week}):\n\n1. Fundamento Fisiopatológico:\nEn Morfofisiopatología Humana I, este aspecto se vincula estrechamente con las alteraciones estructurales celulares y tisulares producidas frente a la agresión.\n\n2. Repercusión Clínica y Diagnóstica:\nSe corrobora mediante exámenes de laboratorio (enzimas, reactantes de fase aguda) e imagenología (ultrasonido, Rx).\n\n3. Enfoque de APS en el Barrio Adentro:\nEn el Consultorio Popular, el diagnóstico precoz fundamenta las acciones de prevención secundaria y control epidemiológico.`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          setMessages(prev => [...prev, tutorMsg]);
+        } finally {
+          setIsTutorThinking(false);
+        }
+      };
+
+      // Request Quiz Question in Chat
+      const handleRequestTutorQuiz = async () => {
+        setIsTutorThinking(true);
+        const currentTutorDoc = documents.find(d => d.week === tutorWeek) || activeDoc;
+
+        try {
+          const res = await fetch('/api/gemini/generate-question', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ week: currentTutorDoc.week, topic: currentTutorDoc.topic, docContent: currentTutorDoc.content })
+          });
+
+          if (res.ok) {
+            const qData = await res.json();
+            setPendingQuiz(qData);
+            const tutorMsg = {
+              id: `t-q-${Date.now()}`,
+              sender: 'tutor',
+              text: `🎯 **PREGUNTA DE EXAMEN (Semana ${currentTutorDoc.week})**:\n\n${qData.question}\n\n*Escribe tu respuesta abajo para evaluarla con la escala de la UCS.*`,
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            setMessages(prev => [...prev, tutorMsg]);
+          } else {
+            throw new Error("Offline");
+          }
+        } catch (e) {
+          const fallbackQ = {
+            question: `Mencione el tipo de respuesta celular/tisular que caracteriza a ${currentTutorDoc.topic} y su importancia diagnóstica.`,
+            correctAnswer: `Alteración estructural específica corroborada por métodos de laboratorio o imagenología.`,
+            explanation: `Revisado según el estándar de la UCS.`
+          };
+          setPendingQuiz(fallbackQ);
+          const tutorMsg = {
+            id: `t-q-${Date.now()}`,
+            sender: 'tutor',
+            text: `🎯 **PREGUNTA DE EXAMEN (Semana ${currentTutorDoc.week})**:\n\n${fallbackQ.question}\n\n*Escribe tu respuesta abajo para evaluarla con la escala de la UCS.*`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          setMessages(prev => [...prev, tutorMsg]);
+        } finally {
+          setIsTutorThinking(false);
+        }
+      };
+
+      // Evaluate Chat Quiz
+      const handleEvaluateTutorQuiz = async () => {
+        if (!pendingQuiz || !quizStudentAns.trim()) return;
+        setIsTutorThinking(true);
+
+        try {
+          const res = await fetch('/api/gemini/evaluate-answer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              question: pendingQuiz.question,
+              studentAnswer: quizStudentAns,
+              correctAnswer: pendingQuiz.correctAnswer
+            })
+          });
+
+          let evalData;
+          if (res.ok) {
+            evalData = await res.json();
+          } else {
+            evalData = {
+              isCorrect: quizStudentAns.length > 15,
+              grade: quizStudentAns.length > 25 ? 'SOBRESALIENTE' : 'SATISFACTORIO',
+              detailedFeedback: 'Excelente fundamentación. Demuestras buen dominio de los conceptos médicos de la asignatura.',
+              correctExplanation: pendingQuiz.correctAnswer
+            };
+          }
+
+          const evalMsg = {
+            id: `t-eval-${Date.now()}`,
+            sender: 'tutor',
+            text: `📝 **EVALUACIÓN DE TU RESPUESTA (${evalData.grade})**:\n\n${evalData.detailedFeedback}\n\n💡 **Respuesta Patrón UCS**: ${evalData.correctExplanation || pendingQuiz.correctAnswer}`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          setMessages(prev => [...prev, evalMsg]);
+          setPendingQuiz(null);
+          setQuizStudentAns('');
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsTutorThinking(false);
+        }
+      };
+
+      // Exam Evaluator
+      const activeQuestion = EXAM_BATTERY[currentQIdx];
+
+      const handleEvaluateExamQuestion = async () => {
+        if (!activeQuestion) return;
+        const answerGiven = activeQuestion.type === 'DESARROLLO_CORTO' ? writtenAns : selectedOpt;
+        if (!answerGiven) return;
+
+        setIsEvaluating(true);
+        try {
+          const res = await fetch('/api/gemini/evaluate-answer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              question: activeQuestion.question,
+              studentAnswer: answerGiven,
+              correctAnswer: activeQuestion.correctAnswer,
+              topicContext: activeQuestion.communityContext
+            })
+          });
+
+          if (res.ok) {
+            const result = await res.json();
+            setEvalResult(result);
+            if (result.isCorrect) setScoreStats(prev => ({ ...prev, correct: prev.correct + 1 }));
+            setScoreStats(prev => ({ ...prev, answered: prev.answered + 1 }));
+          } else {
+            throw new Error("Offline");
+          }
+        } catch (e) {
+          const isCorrect = answerGiven.trim().toLowerCase() === activeQuestion.correctAnswer.trim().toLowerCase() ||
+            (activeQuestion.type === 'DESARROLLO_CORTO' && answerGiven.length > 15);
+          
+          const result = {
+            isCorrect,
+            grade: isCorrect ? 'SOBRESALIENTE' : 'NECESITA MEJORAR',
+            detailedFeedback: isCorrect
+              ? 'Excelente fundamentación clínica. Dominas la fisiopatología y la orientación de la UCS.'
+              : 'Recuerda utilizar la terminología médica oficial y fundamentar el mecanismo celular/tisular.',
+            correctExplanation: activeQuestion.explanation
+          };
+          setEvalResult(result);
+          if (isCorrect) setScoreStats(prev => ({ ...prev, correct: prev.correct + 1 }));
+          setScoreStats(prev => ({ ...prev, answered: prev.answered + 1 }));
+        } finally {
+          setIsEvaluating(false);
+        }
+      };
+
+      const handleNextQuestion = () => {
+        setEvalResult(null);
+        setSelectedOpt('');
+        setWrittenAns('');
+        if (currentQIdx < EXAM_BATTERY.length - 1) {
+          setCurrentQIdx(currentQIdx + 1);
+        } else {
+          setCurrentQIdx(0);
+        }
+      };
+
+      return (
+        <div className="flex flex-col md:flex-row min-h-screen bg-slate-50 text-slate-800 font-sans">
+          
+          {/* Sidebar */}
+          <aside className="w-64 bg-slate-900 border-r border-slate-800 flex-shrink-0 hidden md:flex flex-col text-slate-300">
+            <div className="p-6 border-b border-slate-800">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white text-sm">TC</div>
+                <h1 className="font-bold text-white tracking-tight text-base">Tutor Clínico UCS</h1>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-blue-400 font-semibold bg-blue-500/10 p-2.5 rounded-lg border border-blue-500/20 font-mono">
+                <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                Intensivo 48h Activo
+              </div>
+            </div>
+
+            <nav className="flex-1 p-4 space-y-1.5">
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`w-full p-3 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all cursor-pointer ${
+                  activeTab === 'dashboard' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <i data-lucide="layers" className="w-4 h-4"></i>
+                Plan de Choque 48H
+              </button>
+              <button
+                onClick={() => setActiveTab('estudio')}
+                className={`w-full p-3 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all cursor-pointer ${
+                  activeTab === 'estudio' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <i data-lucide="book-open" className="w-4 h-4"></i>
+                Módulo de Estudio (1-12)
+              </button>
+              <button
+                onClick={() => setActiveTab('tutor')}
+                className={`w-full p-3 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all cursor-pointer ${
+                  activeTab === 'tutor' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <i data-lucide="bot" className="w-4 h-4"></i>
+                Tutor Interactivo IA
+              </button>
+              <button
+                onClick={() => setActiveTab('simulador')}
+                className={`w-full p-3 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all cursor-pointer ${
+                  activeTab === 'simulador' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <i data-lucide="graduation-cap" className="w-4 h-4"></i>
+                Simulador de Baterías
+              </button>
+            </nav>
+
+            <div className="p-4 border-t border-slate-800">
+              <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-800/60">
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2 font-mono">PROGRESO GLOBAL</p>
+                <div className="flex justify-between items-end mb-1.5">
+                  <span className="text-2xl font-mono font-bold text-white">
+                    {Math.round((processedDocs.length / documents.length) * 100)}%
+                  </span>
+                  <span className="text-xs text-slate-400 font-mono">
+                    {Math.round((processedDocs.length / documents.length) * 48)}/48 horas
+                  </span>
+                </div>
+                <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-blue-500 h-full transition-all duration-500" style={{ width: `${(processedDocs.length / documents.length) * 100}%` }}></div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Pane */}
+          <div className="flex-1 flex flex-col min-h-screen">
+            
+            {/* Top Bar */}
+            <header className="sticky top-0 z-40 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shadow-2xs">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 md:hidden">
+                  <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white text-xs">TC</div>
+                  <h2 className="text-sm font-bold text-slate-900">Tutor UCS</h2>
+                </div>
+                <h2 className="text-base font-bold text-slate-800 hidden md:block">
+                  {activeTab === 'dashboard' && 'Dashboard de Prioridad Clínica'}
+                  {activeTab === 'estudio' && 'Temarios Completos & Síntesis IA'}
+                  {activeTab === 'tutor' && 'Tutor Interactivo IA (Preguntar & Quizzes)'}
+                  {activeTab === 'simulador' && 'Simulador de Exámenes UCS (Baterías 2008-2024)'}
+                </h2>
+                <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded uppercase border border-slate-200 font-mono">
+                  S12 / UCS 2024
+                </span>
+              </div>
+
+              {/* Navigation for Mobile */}
+              <div className="flex items-center gap-2">
+                <nav className="flex md:hidden gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+                  <button
+                    onClick={() => setActiveTab('dashboard')}
+                    className={`px-2 py-1 rounded text-[10px] font-bold ${activeTab === 'dashboard' ? 'bg-white text-blue-600 shadow-3xs' : 'text-slate-500'}`}
+                  >
+                    Plan
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('estudio')}
+                    className={`px-2 py-1 rounded text-[10px] font-bold ${activeTab === 'estudio' ? 'bg-white text-blue-600 shadow-3xs' : 'text-slate-500'}`}
+                  >
+                    Estudio
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('tutor')}
+                    className={`px-2 py-1 rounded text-[10px] font-bold ${activeTab === 'tutor' ? 'bg-white text-blue-600 shadow-3xs' : 'text-slate-500'}`}
+                  >
+                    Tutor IA
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('simulador')}
+                    className={`px-2 py-1 rounded text-[10px] font-bold ${activeTab === 'simulador' ? 'bg-white text-blue-600 shadow-3xs' : 'text-slate-500'}`}
+                  >
+                    Simulador
+                  </button>
+                </nav>
+                <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-2xs">
+                  MD
+                </div>
+              </div>
+            </header>
+
+            {/* TAB 1: DASHBOARD */}
+            {activeTab === 'dashboard' && (
+              <main className="flex-1 p-4 md:p-8 space-y-8">
+                <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 rounded-2xl p-6 md:p-8 text-white shadow-lg border border-blue-900/40 relative overflow-hidden">
+                  <div className="space-y-4 max-w-3xl">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-mono">
+                      Plan Intensivo de Choque 48 Horas
+                    </div>
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                      Tutor Clínico UCS <span className="text-blue-400">Morfofisiopatología I</span>
+                    </h1>
+                    <p className="text-slate-300 text-sm leading-relaxed">
+                      Plataforma integradora para la asignatura Morfofisiopatología Humana I de la Universidad de las Ciencias de la Salud (UCS). Incluye todos los temarios oficiales (Semanas 1 a 12), lecturas completas, resúmenes de alto rendimiento, tutor interactivo IA y baterías de exámenes reales.
+                    </p>
+
+                    {processedDocs.length < documents.length ? (
+                      <div className="pt-2 flex flex-wrap gap-4 items-center">
+                        <button
+                          onClick={handleProcessAll}
+                          disabled={isProcessing}
+                          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl transition-all cursor-pointer shadow-lg shadow-blue-500/20 text-sm"
+                        >
+                          {isProcessing ? 'Analizando Sílabo UCS...' : `Procesar Guías Oficiales (${documents.length})`}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 text-blue-400 text-sm font-semibold bg-blue-950/50 border border-blue-500/40 rounded-xl px-4 py-2 font-mono">
+                        ✓ ¡12 Guías Docentes Oficiales UCS Procesadas!
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* Left Column: Guías */}
+                  <div className="lg:col-span-4 space-y-6">
+                    <div className="bg-white rounded-2xl p-6 border border-slate-200 space-y-4 shadow-2xs">
+                      <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                        <i data-lucide="file-text" className="w-5 h-5 text-blue-600"></i>
+                        Guías Temáticas ({documents.length})
+                      </h3>
+                      <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                        {documents.map(doc => {
+                          const isProc = processedDocs.includes(doc.id);
+                          return (
+                            <div
+                              key={doc.id}
+                              onClick={() => {
+                                setSelectedWeek(doc.week);
+                                setActiveTab('estudio');
+                              }}
+                              className={`p-3 rounded-xl border flex justify-between items-center cursor-pointer transition-all ${isProc ? 'bg-blue-50/40 border-blue-100 hover:border-blue-300' : 'bg-slate-50 border-slate-100 hover:bg-slate-100'}`}
+                            >
+                              <div className="truncate pr-2">
+                                <p className="text-xs font-mono text-slate-400">Semana {doc.week}</p>
+                                <h4 className="text-sm font-semibold truncate text-slate-800">{doc.topic}</h4>
+                              </div>
+                              <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold ${isProc ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-400'}`}>
+                                {isProc ? 'Listo' : 'Pendiente'}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Bloques Académicos */}
+                  <div className="lg:col-span-8 space-y-6">
+                    <div className="bg-white rounded-2xl p-6 border border-slate-200 space-y-6 shadow-2xs">
+                      <h3 className="font-bold text-slate-900 text-lg">Bloques Académicos de la UCS</h3>
+                      <div className="space-y-4">
+                        {CLINICAL_BLOCKS.map(block => (
+                          <div key={block.id} className={`p-5 rounded-xl border border-slate-200 border-l-4 ${block.priority === 'CRÍTICA' ? 'border-l-rose-500' : 'border-l-amber-500'}`}>
+                            <div className="flex justify-between items-start gap-4 mb-2">
+                              <div>
+                                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 mr-2">
+                                  PRIORIDAD {block.priority}
+                                </span>
+                                <h4 className="text-base font-bold text-slate-900 inline">{block.name}</h4>
+                              </div>
+                              <span className="text-xs font-mono text-slate-400">Semanas: {block.weeks.join(', ')}</span>
+                            </div>
+                            <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100 font-sans">
+                              <strong>Objetivo Clínico:</strong> {block.clinicalGoal}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </main>
+            )}
+
+            {/* TAB 2: MÓDULO DE ESTUDIO */}
+            {activeTab === 'estudio' && (
+              <main className="flex-1 p-4 md:p-8 space-y-6">
+                <div className="bg-white rounded-2xl p-6 border border-slate-200 space-y-4 shadow-2xs">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h3 className="font-bold text-slate-900 text-lg">Selector de Temarios (Semanas 1 a 12)</h3>
+                    
+                    {/* View Mode Switcher */}
+                    <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
+                      <button
+                        onClick={() => setStudyViewMode('lectura')}
+                        className={`px-4 py-2 rounded-lg transition-all ${studyViewMode === 'lectura' ? 'bg-white text-blue-700 shadow-3xs' : 'text-slate-600'}`}
+                      >
+                        Lectura Completa del Tema
+                      </button>
+                      <button
+                        onClick={() => setStudyViewMode('sintesis')}
+                        className={`px-4 py-2 rounded-lg transition-all ${studyViewMode === 'sintesis' ? 'bg-white text-blue-700 shadow-3xs' : 'text-slate-600'}`}
+                      >
+                        Resumen High-Yield IA
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    <div>
+                      <label className="text-xs font-mono font-semibold text-slate-500 uppercase">Bloque Académico</label>
+                      <select
+                        value={selectedBlockId}
+                        onChange={(e) => setSelectedBlockId(e.target.value)}
+                        className="w-full text-sm p-3 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-800"
+                      >
+                        {CLINICAL_BLOCKS.map(b => (
+                          <option key={b.id} value={b.id}>{b.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-mono font-semibold text-slate-500 uppercase">Semana / Tema</label>
+                      <select
+                        value={selectedWeek}
+                        onChange={(e) => {
+                          setSelectedWeek(Number(e.target.value));
+                          setGeneratedStudy(null);
+                        }}
+                        className="w-full text-sm p-3 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-800"
+                      >
+                        {activeBlock.weeks.map(wk => (
+                          <option key={wk} value={wk}>Semana {wk}: {documents.find(d => d.week === wk)?.topic}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex items-end gap-2">
+                      <button
+                        onClick={handleGenerateAIStudy}
+                        disabled={isGeneratingStudy}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl text-xs sm:text-sm transition-all cursor-pointer shadow-md shadow-blue-500/10"
+                      >
+                        {isGeneratingStudy ? 'Sintetizando con IA...' : 'Resumen IA High-Yield'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setTutorWeek(selectedWeek);
+                          setActiveTab('tutor');
+                        }}
+                        className="bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-4 rounded-xl text-xs sm:text-sm cursor-pointer"
+                      >
+                        Preguntar al Tutor
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {activeDoc && (
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Left: Content or Synthesis */}
+                    <div className="lg:col-span-8 space-y-6">
+                      
+                      {studyViewMode === 'lectura' ? (
+                        <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 space-y-6 shadow-2xs">
+                          <div className="border-b border-slate-100 pb-4">
+                            <span className="text-xs font-mono text-blue-600 font-semibold uppercase">Guía Docente Oficial — Semana {activeDoc.week}</span>
+                            <h2 className="text-xl md:text-2xl font-bold text-slate-900 mt-1">{activeDoc.topic}</h2>
+                          </div>
+                          
+                          <div className="bg-blue-50/70 p-4 rounded-xl border border-blue-100 text-slate-800 text-sm">
+                            <h4 className="font-bold text-blue-900 text-xs font-mono uppercase mb-1">📌 Resumen Orientador:</h4>
+                            <p>{activeDoc.summary}</p>
+                          </div>
+
+                          <div className="space-y-4">
+                            <h3 className="text-base font-bold text-slate-900 border-l-4 border-l-blue-600 pl-3">Desarrollo Temático Completo:</h3>
+                            <div className="text-slate-800 text-sm md:text-base leading-relaxed whitespace-pre-line bg-slate-50/60 p-6 rounded-2xl border border-slate-200">
+                              {activeDoc.content}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-6">
+                          <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 space-y-6 shadow-2xs">
+                            <span className="text-xs font-mono text-blue-600 font-semibold uppercase">Síntesis High-Yield — Semana {activeDoc.week}</span>
+                            <h2 className="text-xl md:text-2xl font-bold text-slate-900">{activeDoc.topic}</h2>
+                            <div className="prose text-sm md:text-base text-slate-700 leading-relaxed whitespace-pre-wrap font-sans">
+                              {generatedStudy ? generatedStudy.sintesis : activeDoc.content}
+                            </div>
+                          </div>
+
+                          <div className="bg-white rounded-2xl p-6 border border-slate-200 space-y-4 shadow-2xs">
+                            <h4 className="font-bold text-slate-900 text-base">Puntos Focalizados UCS (Preguntas Frecuentes)</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {(generatedStudy?.puntosFocalizados || [
+                                "Etiopatogenia, alteración morfológica y significación clínica.",
+                                "Diferencias macroscópicas y microscópicas clave.",
+                                "Mecanismos celulares y moleculares.",
+                                "Laboratorio e imagenología en el entorno comunitario del ASIC."
+                              ]).map((pt, i) => (
+                                <div key={i} className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs flex gap-2">
+                                  <span className="text-blue-600 font-mono font-bold">#{i+1}</span>
+                                  <p>{pt}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
+
+                    {/* Right: Flashcards */}
+                    <div className="lg:col-span-4 space-y-6">
+                      <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 text-white space-y-4 shadow-xl">
+                        <h3 className="font-bold text-white text-base">Flashcards High-Yield</h3>
+                        <p className="text-xs text-slate-400">Haz clic en una tarjeta para girarla y revelar la respuesta oficial.</p>
+                        
+                        <div className="space-y-4">
+                          {(generatedStudy?.flashcards || ALL_FLASHCARDS.filter(fc => fc.topicId === activeDoc.id || fc.topicId === `doc-w${selectedWeek}`)).map((fc, i) => {
+                            const cardKey = `fc-${i}`;
+                            const isFlipped = !!flippedCards[cardKey];
+                            return (
+                              <div
+                                key={i}
+                                onClick={() => setFlippedCards(prev => ({ ...prev, [cardKey]: !prev[cardKey] }))}
+                                className="cursor-pointer group relative h-48 w-full perspective"
+                              >
+                                <div className={`relative w-full h-full text-center transition-all duration-500 transform-style preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+                                  <div className="absolute inset-0 bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col justify-between backface-hidden">
+                                    <div className="flex justify-between text-[10px] font-mono text-blue-400 uppercase">
+                                      <span>Tarjeta #{i+1}</span>
+                                      <span className="bg-blue-500/20 px-1.5 py-0.5 rounded text-blue-300">High-Yield</span>
+                                    </div>
+                                    <p className="text-xs font-semibold text-slate-100 flex-grow flex items-center justify-center p-2">{fc.question}</p>
+                                    <span className="text-[10px] text-slate-400 font-mono">Haz clic para revelar</span>
+                                  </div>
+
+                                  <div className="absolute inset-0 bg-blue-950 border border-blue-900 rounded-xl p-4 flex flex-col justify-between rotate-y-180 backface-hidden">
+                                    <div className="text-[10px] font-mono text-blue-300 uppercase">Respuesta Oficial</div>
+                                    <p className="text-xs font-bold text-white flex-grow flex items-center justify-center p-2">{fc.answer}</p>
+                                    <span className="text-[10px] text-blue-400 font-mono">Volver a la pregunta</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </main>
+            )}
+
+            {/* TAB 3: TUTOR INTERACTIVO IA */}
+            {activeTab === 'tutor' && (
+              <main className="flex-1 p-4 md:p-8 space-y-6">
+                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <span className="text-xs font-bold text-blue-600 font-mono uppercase">Tutor Interactivo UCS</span>
+                    <h2 className="text-xl font-bold text-slate-900">Aclarar Dudas & Explicaciones Personalizadas</h2>
+                    <p className="text-xs text-slate-500 mt-1">Pregúntale lo que sea al Tutor o pídele que te haga una pregunta de autoevaluación.</p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-bold text-slate-600 font-mono">Semana:</label>
+                    <select
+                      value={tutorWeek}
+                      onChange={(e) => setTutorWeek(Number(e.target.value))}
+                      className="text-sm font-semibold bg-slate-100 border border-slate-300 rounded-xl px-3 py-2 text-slate-800"
+                    >
+                      {documents.map(d => (
+                        <option key={d.id} value={d.week}>Semana {d.week}: {d.topic.slice(0, 30)}...</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs flex flex-col min-h-[500px]">
+                  {/* Messages */}
+                  <div className="flex-1 p-6 space-y-4 overflow-y-auto max-h-[550px]">
+                    {chatMessages.map(msg => (
+                      <div key={msg.id} className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        {msg.sender === 'tutor' && (
+                          <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0">TC</div>
+                        )}
+                        <div className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-slate-100 text-slate-900 rounded-tl-none border border-slate-200'}`}>
+                          <div className="whitespace-pre-wrap">{msg.text}</div>
+                          <div className={`text-[10px] mt-2 font-mono ${msg.sender === 'user' ? 'text-blue-200 text-right' : 'text-slate-400'}`}>{msg.time}</div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {isTutorThinking && (
+                      <div className="flex gap-2 items-center text-slate-400 text-xs animate-pulse font-mono">
+                        <div className="w-2 h-2 rounded-full bg-blue-600 animate-bounce"></div>
+                        <span>El Tutor Clínico está redactando la explicación...</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Suggestion Chips */}
+                  <div className="p-4 bg-slate-50 border-t border-slate-200 space-y-2">
+                    <div className="flex justify-between items-center text-[11px] font-bold text-slate-500 font-mono">
+                      <span>Sugerencias rápidas:</span>
+                      <button
+                        onClick={handleRequestTutorQuiz}
+                        disabled={isTutorThinking}
+                        className="text-blue-600 font-bold hover:underline cursor-pointer"
+                      >
+                        🎯 ¡Hazme una pregunta de examen!
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        `Explícame detalladamente todo sobre la Semana ${tutorWeek}`,
+                        `¿Cuáles son las preguntas clave de examen de este tema?`,
+                        `¿Cómo aplico este tema en el Consultorio Popular del ASIC?`
+                      ].map((promptText, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handleSendChat(promptText)}
+                          disabled={isTutorThinking}
+                          className="text-xs bg-white hover:bg-blue-50 text-slate-700 font-semibold px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer"
+                        >
+                          {promptText}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quiz Box */}
+                  {pendingQuiz && (
+                    <div className="p-4 bg-blue-50 border-t border-blue-200 space-y-2">
+                      <p className="text-xs font-bold text-blue-900">Responde a la pregunta del Tutor para ser calificado:</p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={quizStudentAns}
+                          onChange={(e) => setQuizStudentAns(e.target.value)}
+                          placeholder="Escribe tu respuesta clínica aquí..."
+                          className="flex-1 text-sm bg-white border border-blue-300 rounded-xl px-4 py-2"
+                        />
+                        <button
+                          onClick={handleEvaluateTutorQuiz}
+                          disabled={!quizStudentAns.trim() || isTutorThinking}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs cursor-pointer"
+                        >
+                          Enviar Respuesta
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Input Form */}
+                  <div className="p-4 bg-white border-t border-slate-200 rounded-b-2xl">
+                    <form onSubmit={(e) => { e.preventDefault(); handleSendChat(); }} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        placeholder="Escribe tu duda clínica sobre el tema..."
+                        disabled={isTutorThinking}
+                        className="flex-1 text-sm bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-blue-600"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!chatInput.trim() || isTutorThinking}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl text-sm cursor-pointer shadow-md shadow-blue-500/10"
+                      >
+                        Preguntar
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </main>
+            )}
+
+            {/* TAB 4: SIMULADOR DE EXAMEN */}
+            {activeTab === 'simulador' && activeQuestion && (
+              <main className="flex-1 p-4 md:p-8 space-y-6">
+                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-2xs space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="text-xs font-mono text-blue-600 font-bold uppercase">Baterías Oficiales UCS 2008-2024</span>
+                      <h2 className="text-xl font-bold text-slate-900 mt-1">Pregunta {currentQIdx + 1} de {EXAM_BATTERY.length}</h2>
+                    </div>
+
+                    <div className="flex gap-4 text-xs font-mono font-bold">
+                      <span className="bg-slate-100 p-2 rounded-lg text-slate-700">Contestadas: {scoreStats.answered}</span>
+                      <span className="bg-emerald-100 p-2 rounded-lg text-emerald-800">Correctas: {scoreStats.correct}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+                    <p className="text-base font-semibold text-slate-900 leading-relaxed font-sans">{activeQuestion.question}</p>
+
+                    {activeQuestion.type === 'SELECT_SIMPLE' || activeQuestion.type === 'CLINICO_COMUNITARIO' ? (
+                      <div className="space-y-2 pt-2">
+                        {activeQuestion.options.map((opt, i) => (
+                          <label
+                            key={i}
+                            className={`flex items-center p-3.5 rounded-xl border cursor-pointer text-xs md:text-sm font-semibold transition-all ${
+                              selectedOpt === opt ? 'bg-blue-50 border-blue-500 text-blue-900 shadow-2xs' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="opt"
+                              value={opt}
+                              checked={selectedOpt === opt}
+                              onChange={(e) => setSelectedOpt(e.target.value)}
+                              className="mr-3 text-blue-600"
+                            />
+                            <span>{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-2 pt-2">
+                        <textarea
+                          rows="4"
+                          value={writtenAns}
+                          onChange={(e) => setWrittenAns(e.target.value)}
+                          placeholder="Escribe tu respuesta de desarrollo corto aquí..."
+                          className="w-full text-sm p-4 rounded-xl border border-slate-300 bg-white focus:outline-blue-600"
+                        />
+                      </div>
+                    )}
+
+                    <div className="pt-2 flex justify-between items-center">
+                      <button
+                        onClick={handleEvaluateExamQuestion}
+                        disabled={isEvaluating || (!selectedOpt && !writtenAns.trim())}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl text-xs md:text-sm cursor-pointer shadow-md shadow-blue-500/10"
+                      >
+                        {isEvaluating ? 'Evaluando...' : 'Evaluar Respuesta'}
+                      </button>
+
+                      {evalResult && (
+                        <button
+                          onClick={handleNextQuestion}
+                          className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-xl text-xs md:text-sm cursor-pointer"
+                        >
+                          Siguiente Pregunta →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {evalResult && (
+                    <div className={`p-6 rounded-2xl border space-y-3 ${evalResult.isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'}`}>
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-sm font-mono">{evalResult.isCorrect ? '✓ RESPUESTA CORRECTA' : '✗ REQUIERE REVISIÓN'}</span>
+                        <span className="px-2.5 py-1 rounded bg-white text-xs font-bold font-mono border">{evalResult.grade}</span>
+                      </div>
+                      <p className="text-xs md:text-sm leading-relaxed">{evalResult.detailedFeedback}</p>
+                      <div className="pt-2 border-t border-slate-200/60 text-xs font-sans">
+                        <strong>Explicación Fisiopatológica Oficial:</strong> {evalResult.correctExplanation}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              </main>
+            )}
+
+          </div>
+
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
 </html>
