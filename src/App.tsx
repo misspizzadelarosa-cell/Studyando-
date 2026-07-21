@@ -5,16 +5,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Activity, GraduationCap, BookOpen, Layers, Award, Sparkles, AlertCircle
+  Activity, GraduationCap, BookOpen, Layers, Award, Sparkles, AlertCircle, MessageSquare
 } from 'lucide-react';
 import { CLINICAL_BLOCKS, PRELOADED_DOCS, PRELOADED_FLASHCARDS, PRELOADED_QUESTIONS } from './data';
 import { PDFDocument, Flashcard, ExamQuestion } from './types';
 import ChoqueDashboard from './components/ChoqueDashboard';
 import ModuloEstudio from './components/ModuloEstudio';
 import SimuladorExamen from './components/SimuladorExamen';
+import TutorChat from './components/TutorChat';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'estudio' | 'simulador'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'estudio' | 'tutor' | 'simulador'>('dashboard');
+  const [selectedTutorWeek, setSelectedTutorWeek] = useState<number>(1);
   
   // Dynamic list of documents (preloaded + custom uploaded)
   const [documents, setDocuments] = useState<PDFDocument[]>([]);
@@ -53,7 +55,6 @@ export default function App() {
       }
     } catch (e) {
       console.error("Error al cargar sesión de localStorage:", e);
-      // Fallback to defaults
       setDocuments(PRELOADED_DOCS);
     }
   }, []);
@@ -65,7 +66,6 @@ export default function App() {
 
   const handleProcessAll = () => {
     setIsProcessing(true);
-    // Simulate high-performance medical AI scan of all files (12 documents)
     setTimeout(() => {
       const allIds = documents.map(d => d.id);
       setProcessedDocs(allIds);
@@ -88,7 +88,6 @@ export default function App() {
     setDocuments(updated);
     saveDocumentsToStorage(updated);
 
-    // Auto-process custom uploaded doc
     setProcessedDocs(prev => {
       const next = [...prev, newDoc.id];
       localStorage.setItem('ucs_processed_docs', JSON.stringify(next));
@@ -110,6 +109,34 @@ export default function App() {
     return response.json();
   };
 
+  // API Call: Ask Tutor any question
+  const handleAskTutor = async (question: string, topic: string, week: number, docContent: string) => {
+    const response = await fetch('/api/gemini/ask-tutor', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, topic, week, docContent })
+    });
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.error || 'Error al comunicarse con el Tutor');
+    }
+    return response.json();
+  };
+
+  // API Call: Generate AI Exam question
+  const handleGenerateQuestion = async (week: number, topic: string, docContent: string) => {
+    const response = await fetch('/api/gemini/generate-question', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ week, topic, docContent })
+    });
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.error || 'Error al generar pregunta');
+    }
+    return response.json();
+  };
+
   // API Call: Evaluate answer using Gemini
   const handleEvaluateAnswer = async (
     question: string,
@@ -127,6 +154,11 @@ export default function App() {
       throw new Error(errData.error || 'Ocurrió un error al calificar la respuesta');
     }
     return response.json();
+  };
+
+  const handleGoToTutorChat = (week: number) => {
+    setSelectedTutorWeek(week);
+    setActiveTab('tutor');
   };
 
   const allFlashcards = [...PRELOADED_FLASHCARDS, ...customFlashcards];
@@ -172,6 +204,18 @@ export default function App() {
           >
             <BookOpen className="w-4 h-4" />
             Módulo de Estudio
+          </button>
+          <button
+            id="sidebar-tab-tutor"
+            onClick={() => setActiveTab('tutor')}
+            className={`w-full p-3 rounded-xl cursor-pointer flex items-center gap-3 text-sm font-semibold transition-all ${
+              activeTab === 'tutor'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/10'
+                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            Tutor Interactivo IA
           </button>
           <button
             id="sidebar-tab-simulador"
@@ -220,7 +264,8 @@ export default function App() {
             </div>
             <h2 className="text-base font-bold text-slate-800 hidden md:block">
               {activeTab === 'dashboard' && 'Dashboard de Prioridad Clínica'}
-              {activeTab === 'estudio' && 'Temarios y Personalización con IA'}
+              {activeTab === 'estudio' && 'Temarios Completo & Síntesis IA'}
+              {activeTab === 'tutor' && 'Tutor Interactivo IA (Preguntar & Quizzes)'}
               {activeTab === 'simulador' && 'Evaluación y Simulador Fisiopatológico'}
             </h2>
             <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded uppercase border border-slate-200/60 font-mono">
@@ -234,10 +279,8 @@ export default function App() {
               <button
                 id="mobile-tab-dashboard"
                 onClick={() => setActiveTab('dashboard')}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-bold font-sans transition-all ${
-                  activeTab === 'dashboard' 
-                    ? 'bg-white text-blue-600 shadow-3xs' 
-                    : 'text-slate-500'
+                className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
+                  activeTab === 'dashboard' ? 'bg-white text-blue-600 shadow-3xs' : 'text-slate-500'
                 }`}
               >
                 Plan 48H
@@ -245,21 +288,26 @@ export default function App() {
               <button
                 id="mobile-tab-estudio"
                 onClick={() => setActiveTab('estudio')}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-bold font-sans transition-all ${
-                  activeTab === 'estudio' 
-                    ? 'bg-white text-blue-600 shadow-3xs' 
-                    : 'text-slate-500'
+                className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
+                  activeTab === 'estudio' ? 'bg-white text-blue-600 shadow-3xs' : 'text-slate-500'
                 }`}
               >
                 Estudio
               </button>
               <button
+                id="mobile-tab-tutor"
+                onClick={() => setActiveTab('tutor')}
+                className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
+                  activeTab === 'tutor' ? 'bg-white text-blue-600 shadow-3xs' : 'text-slate-500'
+                }`}
+              >
+                Tutor IA
+              </button>
+              <button
                 id="mobile-tab-simulador"
                 onClick={() => setActiveTab('simulador')}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-bold font-sans transition-all ${
-                  activeTab === 'simulador' 
-                    ? 'bg-white text-blue-600 shadow-3xs' 
-                    : 'text-slate-500'
+                className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
+                  activeTab === 'simulador' ? 'bg-white text-blue-600 shadow-3xs' : 'text-slate-500'
                 }`}
               >
                 Simulador
@@ -268,7 +316,7 @@ export default function App() {
 
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-bold font-mono text-slate-400 bg-slate-50 px-2 py-1 rounded border border-slate-100 hidden sm:inline-block">
-                Mayo 2024
+                UCS 2024
               </span>
               <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 border border-blue-200 flex items-center justify-center text-white font-bold text-xs shadow-2xs">
                 MD
@@ -297,6 +345,18 @@ export default function App() {
               documents={documents}
               flashcards={allFlashcards}
               onGenerateStudyMaterial={handleGenerateStudyMaterial}
+              onGoToTutorChat={handleGoToTutorChat}
+            />
+          )}
+
+          {activeTab === 'tutor' && (
+            <TutorChat
+              documents={documents}
+              selectedWeek={selectedTutorWeek}
+              onWeekChange={setSelectedTutorWeek}
+              onAskTutor={handleAskTutor}
+              onGenerateQuestion={handleGenerateQuestion}
+              onEvaluateAnswer={handleEvaluateAnswer}
             />
           )}
 
@@ -313,7 +373,7 @@ export default function App() {
         <footer className="h-12 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between px-6 py-2 sm:py-0 text-[10px] text-slate-400 font-mono gap-1 mt-auto">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Gemini 3.5 Engine: ONLINE</span>
+            <span>Gemini Engine: ONLINE</span>
           </div>
           <span>© 2026 Tutor Clínico UCS - Optimizador de Aprendizaje Acelerado</span>
         </footer>

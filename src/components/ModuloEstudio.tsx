@@ -7,7 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   BookOpen, Sparkles, AlertCircle, RefreshCw, Layers, CheckCircle, 
-  HelpCircle, Eye, HelpCircle as HelpIcon, ArrowRightLeft, BookMarked
+  HelpCircle, Eye, HelpCircle as HelpIcon, ArrowRightLeft, BookMarked,
+  FileText, MessageSquare, ArrowRight
 } from 'lucide-react';
 import { ClinicalBlock, PDFDocument, Flashcard } from '../types';
 
@@ -20,16 +21,19 @@ interface ModuloEstudioProps {
     puntosFocalizados: string[];
     flashcards: { question: string; answer: string; explanation: string }[];
   }>;
+  onGoToTutorChat?: (week: number) => void;
 }
 
 export default function ModuloEstudio({
   blocks,
   documents,
   flashcards,
-  onGenerateStudyMaterial
+  onGenerateStudyMaterial,
+  onGoToTutorChat
 }: ModuloEstudioProps) {
   const [selectedBlockId, setSelectedBlockId] = useState<string>(blocks[0]?.id || '');
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
+  const [viewMode, setViewMode] = useState<'lectura' | 'sintesis'>('lectura');
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
@@ -49,7 +53,6 @@ export default function ModuloEstudio({
   // Sync selected week when active block changes
   useEffect(() => {
     if (blockWeeks.length > 0) {
-      // Find the first week available in the block
       setSelectedWeek(blockWeeks[0]);
       setGeneratedMaterial(null);
       setFlippedCards({});
@@ -69,7 +72,7 @@ export default function ModuloEstudio({
         yield: 'HIGH-YIELD' as const,
         explanation: fc.explanation
       }))
-    : flashcards.filter(fc => fc.topicId === activeDoc?.id);
+    : flashcards.filter(fc => fc.topicId === activeDoc?.id || fc.topicId === `doc-w${selectedWeek}`);
 
   const handleGenerate = async () => {
     if (!activeDoc) return;
@@ -82,6 +85,7 @@ export default function ModuloEstudio({
         activeDoc.content
       );
       setGeneratedMaterial(result);
+      setViewMode('sintesis');
     } catch (err: any) {
       console.error(err);
       setErrorMsg(err.message || 'No se pudo conectar con el Tutor Clínico Gemini. Mostrando apuntes estáticos locales.');
@@ -102,11 +106,39 @@ export default function ModuloEstudio({
       
       {/* Top Selectors Bar */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-        <h3 className="font-sans font-bold text-slate-900 text-lg flex items-center gap-2">
-          <Layers className="w-5 h-5 text-blue-600" /> Selector de Temarios UCS
-        </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h3 className="font-sans font-bold text-slate-900 text-lg flex items-center gap-2">
+            <Layers className="w-5 h-5 text-blue-600" /> Selector de Temarios UCS (Semanas 1 a 12)
+          </h3>
+
+          {/* View Mode Toggle */}
+          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold font-sans">
+            <button
+              onClick={() => setViewMode('lectura')}
+              className={`px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                viewMode === 'lectura'
+                  ? 'bg-white text-blue-700 shadow-3xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              Lectura Completa del Tema
+            </button>
+            <button
+              onClick={() => setViewMode('sintesis')}
+              className={`px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                viewMode === 'sintesis'
+                  ? 'bg-white text-blue-700 shadow-3xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Sparkles className="w-4 h-4" />
+              Resumen IA & Flashcards
+            </button>
+          </div>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-500 uppercase font-mono">Bloque Académico</label>
             <select
@@ -145,25 +177,35 @@ export default function ModuloEstudio({
             </select>
           </div>
 
-          <div className="flex items-end">
+          <div className="flex items-end gap-2">
             <button
               id="btn-ai-generate"
               onClick={handleGenerate}
               disabled={isGenerating || !activeDoc}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50 cursor-pointer shadow-md shadow-blue-500/10"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl text-xs sm:text-sm transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-blue-500/10"
             >
               {isGenerating ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin text-blue-300" />
-                  Sintetizando con Gemini...
+                  Sintetizando...
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 text-blue-300" />
-                  Personalizar Estudio con IA
+                  Resumen IA High-Yield
                 </>
               )}
             </button>
+
+            {onGoToTutorChat && (
+              <button
+                onClick={() => onGoToTutorChat(selectedWeek)}
+                className="bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-4 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <MessageSquare className="w-4 h-4 text-blue-400" />
+                <span>Preguntar al Tutor</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -181,99 +223,143 @@ export default function ModuloEstudio({
       {activeDoc ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* Left panel: Synthesis and evaluation points */}
+          {/* Main content column */}
           <div className="lg:col-span-8 space-y-6">
             
-            {/* Sintesis Clave Directa */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6 relative">
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <div className="text-xs font-semibold text-blue-600 font-mono uppercase">
-                    Semana {activeDoc.week} — Fisiopatología y APS
+            {viewMode === 'lectura' ? (
+              /* Lectura Completa del Tema */
+              <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
+                <div className="border-b border-slate-100 pb-4 flex justify-between items-start">
+                  <div>
+                    <div className="text-xs font-bold text-blue-600 font-mono uppercase">
+                      LECTURA COMPLETA Y EXHAUSTIVA — SEMANA {activeDoc.week}
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 mt-1">
+                      {activeDoc.topic}
+                    </h2>
                   </div>
-                  <h2 className="text-xl md:text-2xl font-bold font-sans text-slate-900 leading-tight">
-                    {activeDoc.topic}
-                  </h2>
-                </div>
-                {generatedMaterial && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-100/50 border border-blue-200 px-2.5 py-1 rounded-full font-mono animate-pulse">
-                    <Sparkles className="w-3 h-3 text-blue-500" /> IA Activa
+                  <span className="text-xs bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-full border border-blue-200">
+                    Guía Docente Oficial UCS
                   </span>
-                )}
-              </div>
+                </div>
 
-              <div className="prose prose-slate max-w-none text-slate-700 text-sm md:text-base leading-relaxed space-y-4">
-                {generatedMaterial ? (
-                  <p className="whitespace-pre-wrap">{generatedMaterial.sintesis}</p>
-                ) : (
-                  <>
-                    <p className="font-semibold text-slate-900 bg-slate-50 p-4 rounded-xl border-l-4 border-l-blue-600 shadow-3xs">
-                      {activeDoc.summary}
-                    </p>
-                    <p className="whitespace-pre-line text-slate-600 text-sm">{activeDoc.content}</p>
-                  </>
-                )}
-              </div>
+                <div className="bg-blue-50/60 p-4 rounded-xl border border-blue-100 text-slate-800 text-sm leading-relaxed font-sans">
+                  <h4 className="font-bold text-blue-900 text-xs font-mono uppercase mb-1">
+                    📌 Resumen Orientador de la Clase:
+                  </h4>
+                  <p>{activeDoc.summary}</p>
+                </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-mono">
-                <span>Robbins Patología 7ma / 10ma Edición</span>
-                <span>UCS Morfofisiopatología I</span>
-              </div>
-            </div>
+                <div className="prose prose-slate max-w-none space-y-4">
+                  <h3 className="text-base font-bold text-slate-900 border-l-4 border-l-blue-600 pl-3">
+                    Desarrollo del Contenido Temático:
+                  </h3>
+                  <div className="text-slate-800 text-sm md:text-base leading-relaxed whitespace-pre-line font-sans bg-slate-50/50 p-6 rounded-2xl border border-slate-200/80">
+                    {activeDoc.content}
+                  </div>
+                </div>
 
-            {/* Puntos Focalizados UCS (Lo que van a preguntar) */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-              <h4 className="font-sans font-bold text-slate-900 text-base flex items-center gap-2">
-                <BookMarked className="w-5 h-5 text-amber-500" />
-                Puntos Focalizados UCS (Lo que van a preguntar en el examen)
-              </h4>
-              <p className="text-xs text-slate-500 font-sans">
-                Preguntas de patrón oficial y criterios estricto de Atención Primaria. Memoriza estos aspectos:
-              </p>
+                <div className="p-4 bg-slate-900 text-white rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div>
+                    <h4 className="text-sm font-bold text-blue-300">¿Tienes alguna duda sobre este tema?</h4>
+                    <p className="text-xs text-slate-400">Puedes pedirle al Tutor Clínico IA que te lo explique detalladamente o te haga preguntas de examen.</p>
+                  </div>
+                  {onGoToTutorChat && (
+                    <button
+                      onClick={() => onGoToTutorChat(selectedWeek)}
+                      className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-2 cursor-pointer flex-shrink-0"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      Consultar con el Tutor IA
+                    </button>
+                  )}
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {generatedMaterial?.puntosFocalizados ? (
-                  generatedMaterial.puntosFocalizados.map((punto, i) => (
-                    <div key={i} className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl flex gap-2 text-xs text-slate-700 font-sans">
-                      <span className="text-blue-600 font-mono font-bold mt-0.5">#{i+1}</span>
-                      <p className="font-sans">{punto}</p>
-                    </div>
-                  ))
-                ) : (
-                  <>
-                    <div className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl flex gap-2 text-xs text-slate-700 font-sans">
-                      <span className="text-blue-600 font-mono font-bold mt-0.5">#1</span>
-                      <p>Clasificaciones estrictas de procesos: ej. células lábiles, estables o permanentes y ejemplos clínicos.</p>
-                    </div>
-                    <div className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl flex gap-2 text-xs text-slate-700 font-sans">
-                      <span className="text-blue-600 font-mono font-bold mt-0.5">#2</span>
-                      <p>Diferencias microscópicas y macroscópicas claves: ej. necrosis por coagulación vs colicuativa, y sus órganos diana.</p>
-                    </div>
-                    <div className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl flex gap-2 text-xs text-slate-700 font-sans">
-                      <span className="text-blue-600 font-mono font-bold mt-0.5">#3</span>
-                      <p>Mecanismo celular en la hipoxia: Falla de bombas de membrana, disminución de ATP y su traducción morfológica.</p>
-                    </div>
-                    <div className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl flex gap-2 text-xs text-slate-700 font-sans">
-                      <span className="text-blue-600 font-mono font-bold mt-0.5">#4</span>
-                      <p>Marcadores analíticos e imagenológicos asociados para corroborar el proceso patológico ante el ASIC comunitario.</p>
-                    </div>
-                  </>
-                )}
               </div>
-            </div>
+            ) : (
+              /* Sintesis IA & Puntos Focalizados */
+              <div className="space-y-6">
+                <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6 relative">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <div className="text-xs font-semibold text-blue-600 font-mono uppercase">
+                        SÍNTESIS DE ALTO RENDIMIENTO — SEMANA {activeDoc.week}
+                      </div>
+                      <h2 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight">
+                        {activeDoc.topic}
+                      </h2>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-100/50 border border-blue-200 px-2.5 py-1 rounded-full font-mono">
+                      <Sparkles className="w-3 h-3 text-blue-500" /> High-Yield IA
+                    </span>
+                  </div>
+
+                  <div className="prose prose-slate max-w-none text-slate-800 text-sm md:text-base leading-relaxed space-y-4">
+                    {generatedMaterial ? (
+                      <p className="whitespace-pre-wrap">{generatedMaterial.sintesis}</p>
+                    ) : (
+                      <>
+                        <p className="font-semibold text-slate-900 bg-slate-50 p-4 rounded-xl border-l-4 border-l-blue-600 shadow-3xs">
+                          {activeDoc.summary}
+                        </p>
+                        <p className="whitespace-pre-line text-slate-600 text-sm">{activeDoc.content}</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Puntos Focalizados UCS */}
+                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                  <h4 className="font-sans font-bold text-slate-900 text-base flex items-center gap-2">
+                    <BookMarked className="w-5 h-5 text-amber-500" />
+                    Puntos Focalizados UCS (Evaluados con mayor frecuencia)
+                  </h4>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {generatedMaterial?.puntosFocalizados ? (
+                      generatedMaterial.puntosFocalizados.map((punto, i) => (
+                        <div key={i} className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl flex gap-2 text-xs text-slate-700 font-sans">
+                          <span className="text-blue-600 font-mono font-bold mt-0.5">#{i+1}</span>
+                          <p className="font-sans">{punto}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl flex gap-2 text-xs text-slate-700 font-sans">
+                          <span className="text-blue-600 font-mono font-bold mt-0.5">#1</span>
+                          <p>Clasificaciones estrictas de procesos: ej. células lábiles, estables o permanentes y ejemplos clínicos.</p>
+                        </div>
+                        <div className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl flex gap-2 text-xs text-slate-700 font-sans">
+                          <span className="text-blue-600 font-mono font-bold mt-0.5">#2</span>
+                          <p>Diferencias microscópicas y macroscópicas claves: ej. necrosis por coagulación vs colicuativa.</p>
+                        </div>
+                        <div className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl flex gap-2 text-xs text-slate-700 font-sans">
+                          <span className="text-blue-600 font-mono font-bold mt-0.5">#3</span>
+                          <p>Mecanismo celular en la hipoxia: Falla de bombas de membrana, disminución de ATP y tumefacción.</p>
+                        </div>
+                        <div className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl flex gap-2 text-xs text-slate-700 font-sans">
+                          <span className="text-blue-600 font-mono font-bold mt-0.5">#4</span>
+                          <p>Marcadores analíticos e imagenológicos asociados para corroborar el proceso patológico ante el ASIC.</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
           </div>
 
           {/* Right panel: Flashcards de Memorización Rápida */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-850 text-white shadow-xl space-y-4">
+            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 text-white shadow-xl space-y-4">
               <div className="space-y-1">
                 <h3 className="font-sans font-bold text-white text-base flex items-center gap-2">
                   <HelpIcon className="w-5 h-5 text-blue-400" />
                   Flashcards High-Yield
                 </h3>
                 <p className="text-slate-400 text-xs leading-relaxed font-sans">
-                  Haz clic en las tarjetas para girarlas y revelar los datos clínicos clave para memorizar rápidamente antes del examen.
+                  Haz clic en las tarjetas para girarlas y revelar los datos clave para memorizar rápidamente.
                 </p>
               </div>
 
@@ -287,7 +373,6 @@ export default function ModuloEstudio({
                         onClick={() => toggleFlip(fc.id)}
                         className="cursor-pointer group relative h-48 w-full perspective"
                       >
-                        {/* Interactive flippable card body */}
                         <div className={`relative w-full h-full text-center transition-all duration-500 transform-style preserve-3d ${
                           isFlipped ? 'rotate-y-180' : ''
                         }`}>
@@ -330,7 +415,7 @@ export default function ModuloEstudio({
                   })
                 ) : (
                   <div className="p-6 text-center bg-slate-800/50 rounded-xl border border-slate-800/80 text-slate-400 text-xs font-sans">
-                    No hay flashcards para este tema. Haz clic en "Personalizar Estudio con IA" para generarlas en tiempo real.
+                    No hay flashcards específicas. Haz clic en "Resumen IA High-Yield" para generarlas en tiempo real.
                   </div>
                 )}
               </div>
@@ -341,10 +426,7 @@ export default function ModuloEstudio({
       ) : (
         <div className="text-center p-12 bg-white rounded-2xl border border-slate-200">
           <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-          <h4 className="font-sans font-bold text-slate-800">Cargar Sílabo para comenzar</h4>
-          <p className="text-sm text-slate-500 max-w-sm mx-auto mt-1 font-sans">
-            Por favor, procesa primero todos los documentos en la pestaña de Plan de Choque para habilitar el selector de materias.
-          </p>
+          <h4 className="font-sans font-bold text-slate-800">Selecciona un tema para comenzar</h4>
         </div>
       )}
 
